@@ -6,8 +6,6 @@ class Besign < Formula
   license "MIT"
 
   depends_on "cmake" => :build
-  depends_on "python" # Python 3 is installed via Homebrew and will be available for CMake
-  depends_on "opencv"
   depends_on "qrencode"
   depends_on "openssl"
   depends_on "curl"
@@ -15,24 +13,6 @@ class Besign < Formula
   depends_on "ossp-uuid"
 
   def install
-    # Define the pip configuration path
-    pip_conf_dir = "#{ENV["HOME"]}/.config/pip"
-    pip_conf_file = "#{pip_conf_dir}/pip.conf"
-
-    # Create the pip configuration directory and file
-    mkdir_p pip_conf_dir
-    (path/pip_conf_file).write <<~EOS
-      [global]
-      break-system-packages = true
-    EOS
-
-    # Install Python dependencies directly
-    # Ensure pip is available
-    python_version = Language::Python.major_minor_version "python3"
-    system "pip#{python_version}", "install", "fitz"
-    system "pip#{python_version}", "install", "qrcode"
-    system "pip#{python_version}", "install", "Pillow"
-
     cd "build" do
       system "cmake", "..", *std_cmake_args
       system "make"
