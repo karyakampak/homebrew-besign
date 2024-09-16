@@ -164,19 +164,13 @@ add_custom_target(
 
 # Determine platform-specific include and lib directories
 if(APPLE)
-    set(INCLUDE_DIR "/usr/local/opt/dksign/include")
-    set(LIB_DIR "/usr/local/opt/dksign/lib")
-    set(BIN_DIR "/usr/local/opt/dksign/bin")
-    set(OTHER_DIR "/usr/local/opt/dksign")
-    set(LOCAL_LIB "/usr/local/lib")
-elseif(UNIX)
-    set(INCLUDE_DIR "/usr/include/dksign")
-    set(LIB_DIR "/usr/lib/dksign")
-    set(BIN_DIR "/usr/bin/dksign")
-    set(OTHER_DIR "/usr/include/dksign")
-    set(LOCAL_LIB "/usr/lib")
+    set(INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
+    set(LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+    set(BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin")
 else()
-    message(FATAL_ERROR "Unsupported platform")
+    set(INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
+    set(LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+    set(BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin")
 endif()
 
 
@@ -221,7 +215,7 @@ install(FILES
     LICENSE.txt
     README.md
     AUTHORS.md
-    DESTINATION ${OTHER_DIR}
+    DESTINATION ${INCLUDE_DIR}
 )
 
 set_target_properties(dksign_library PROPERTIES
@@ -242,7 +236,7 @@ set_target_properties(dksign_library dksign_object dksign_executable PROPERTIES 
 
 # Install all files from the cython directory to the destination directory
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/cython_build/
-        DESTINATION ${LOCAL_LIB}
+        DESTINATION ${LIB_DIR}
         FILES_MATCHING PATTERN "*")
 
 
@@ -257,7 +251,7 @@ install(CODE "
     endif()
 
     # Define the export command to add PYTHONPATH
-    set(EXPORT_COMMAND \"echo 'export PYTHONPATH=${LOCAL_LIB}:\\\$PYTHONPATH' >> \${SHELL_RC}\")
+    set(EXPORT_COMMAND \"echo 'export PYTHONPATH=${LIB_DIR}:\\\$PYTHONPATH' >> \${SHELL_RC}\")
     
     # Execute the command to update the shell config
     execute_process(COMMAND /bin/sh -c \"\${EXPORT_COMMAND}\")
