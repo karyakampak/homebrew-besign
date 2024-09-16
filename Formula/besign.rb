@@ -14,7 +14,6 @@ class Besign < Formula
   depends_on "nlohmann-json"
   depends_on "ossp-uuid"
 
-  system "brew", "install", "python"
 
   def install
     cd "build" do
