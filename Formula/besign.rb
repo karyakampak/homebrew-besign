@@ -6,13 +6,15 @@ class Besign < Formula
   license "MIT"
 
   depends_on "cmake" => :build
-  depends_on "python@3"
+  # depends_on "python@3"
   # depends_on "opencv"
   depends_on "qrencode"
   depends_on "openssl"
   depends_on "curl"
   depends_on "nlohmann-json"
   depends_on "ossp-uuid"
+
+  system "brew", "install", "python"
 
   def install
     cd "build" do
