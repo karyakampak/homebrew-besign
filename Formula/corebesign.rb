@@ -1,7 +1,7 @@
 class Myprogram < Formula
   desc "My awesome program"
-  homepage "https://github.com/karyakampak/corebesign"
-  url "https://github.com/karyakampak/corebesign/archive/refs/tags/v1.0.0.tar.gz"
+  homepage "https://github.com/karyakampak/besign"
+  url "https://github.com/karyakampak/besign/archive/refs/tags/v1.0.0.tar.gz"
   sha256 "<sha256_of_tarball>"
   license "MIT"
 
