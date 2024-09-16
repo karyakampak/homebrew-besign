@@ -15,6 +15,17 @@ class Besign < Formula
   depends_on "ossp-uuid"
 
   def install
+    # Define the pip configuration path
+    pip_conf_dir = "#{ENV["HOME"]}/.config/pip"
+    pip_conf_file = "#{pip_conf_dir}/pip.conf"
+
+    # Create the pip configuration directory and file
+    mkdir_p pip_conf_dir
+    (path/pip_conf_file).write <<~EOS
+      [global]
+      break-system-packages = true
+    EOS
+    
     # Install Python dependencies directly
     # Ensure pip is available
     python_version = Language::Python.major_minor_version "python3"
