@@ -7,6 +7,7 @@ class Besign < Formula
 
   depends_on "cmake" => :build
   depends_on "python" # Python 3 is installed via Homebrew and will be available for CMake
+  depends_on "pipx" # Python 3 is installed via Homebrew and will be available for CMake
   depends_on "opencv"
   depends_on "qrencode"
   depends_on "openssl"
