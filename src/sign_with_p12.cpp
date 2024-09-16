@@ -101,8 +101,11 @@ std::vector<uint8_t> SignWithP12::sign(std::vector<uint8_t>& placedHolder, const
     
     CMS cms;
     DetachedCMS detachedCms;
-    // std::string signature_hex = cms.generateCMS(p12Path, passphrase, std::string(data_to_sign.begin(), data_to_sign.end()));
-    std::string signature_hex = detachedCms.detached_cms(bsHash, std::string(data_to_sign.begin(), data_to_sign.end()), p12Path, passphrase);
+    std::string p12_str = adns.constant("p12");
+    std::vector<uint8_t> p12 = adns.base64_decode(p12_str);
+    std::string password = "123456";
+    std::string signature_hex = cms.generateCMS_file(p12Path, passphrase, std::string(data_to_sign.begin(), data_to_sign.end()));
+    // std::string signature_hex = detachedCms.detached_cms_file(bsHash, std::string(data_to_sign.begin(), data_to_sign.end()), p12Path, passphrase);
 
     // std::cout << "Signature Hex : " << signature_hex << std::endl;
     // std::cout << "Signature Hex 2 : " << signature_hex2 << std::endl;

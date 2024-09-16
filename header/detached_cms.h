@@ -30,7 +30,8 @@ public:
     DetachedCMS();
 
     // Member function declaration
-    std::string detached_cms(const std::string& hash, const std::string& data, const char* p12Path, const char* passphrase);
+    std::string detached_cms_file(const std::string& hash, const std::string& data, const char* p12Path, const char* passphrase);
+    std::string detached_cms(const std::string& hash, const std::string& data, const std::vector<uint8_t>& p12, const char* passphrase);
 };
 
 #endif

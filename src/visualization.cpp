@@ -46,7 +46,7 @@ std::vector<uint8_t> process_image(std::vector<unsigned char> image_data) {
     Py_Initialize();
 
     // Import the Cython module
-    PyObject* pName = PyUnicode_DecodeFSDefault("helper");
+    PyObject* pName = PyUnicode_DecodeFSDefault("besign_helper");
     PyObject* pModule = PyImport_Import(pName);
     Py_XDECREF(pName);
 
@@ -90,7 +90,7 @@ std::vector<double> find_char_position(const char* pdf_path, int page_num, const
     Py_Initialize();
     
     // Import the Cython module
-    PyObject* pName = PyUnicode_DecodeFSDefault("helper");
+    PyObject* pName = PyUnicode_DecodeFSDefault("besign_helper");
     PyObject* pModule = PyImport_Import(pName);
     Py_XDECREF(pName);
     

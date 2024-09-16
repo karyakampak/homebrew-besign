@@ -6,15 +6,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 # set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
-project(DKSIGN)
+project(BESIGN)
 
 # Define the shared library
-add_library(dksign_library SHARED
+add_library(besign_library SHARED
     src/add_ocsp_trailer.cpp
     src/add_ocsp_dict.cpp
     src/get_ocsp_response.cpp
     src/sign_bsre.cpp
     src/sign_with_p12.cpp
+    src/sign.cpp
     src/cms.cpp
     src/detached_cms.cpp
     src/place_signature.cpp
@@ -34,12 +35,13 @@ add_library(dksign_library SHARED
     src/main.cpp
 )
 
-add_library(dksign_object OBJECT
+add_library(besign_object OBJECT
     src/add_ocsp_trailer.cpp
     src/add_ocsp_dict.cpp
     src/get_ocsp_response.cpp
     src/sign_bsre.cpp
     src/sign_with_p12.cpp
+    src/sign.cpp
     src/cms.cpp
     src/detached_cms.cpp
     src/place_signature.cpp
@@ -59,12 +61,13 @@ add_library(dksign_object OBJECT
     src/main.cpp
 )
 
-add_executable(dksign_executable
+add_executable(besign_executable
     src/add_ocsp_trailer.cpp
     src/add_ocsp_dict.cpp
     src/get_ocsp_response.cpp
     src/sign_bsre.cpp
     src/sign_with_p12.cpp
+    src/sign.cpp
     src/cms.cpp
     src/detached_cms.cpp
     src/place_signature.cpp
@@ -89,66 +92,32 @@ add_executable(dksign_executable
 # Find Python
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 include_directories(${Python3_INCLUDE_DIRS})
-target_link_libraries(dksign_executable ${Python3_LIBRARIES})
-target_link_libraries(dksign_library ${Python3_LIBRARIES})
-target_link_libraries(dksign_object ${Python3_LIBRARIES})
 
 
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
-target_link_libraries(dksign_executable ${OpenCV_LIBS})
-target_link_libraries(dksign_library ${OpenCV_LIBS})
-target_link_libraries(dksign_object ${OpenCV_LIBS})
 
 find_library(QRENCODE_LIB qrencode)
-
-if (QRENCODE_LIB)
-    target_link_libraries(dksign_executable ${QRENCODE_LIB})
-    target_link_libraries(dksign_library ${QRENCODE_LIB})
-    target_link_libraries(dksign_object ${QRENCODE_LIB})
-else()
-    message(FATAL_ERROR "qrencode library not found")
-endif()
 
 
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
-target_link_libraries(dksign_executable ${OPENSSL_LIBRARIES})
-target_link_libraries(dksign_library ${OPENSSL_LIBRARIES})
-target_link_libraries(dksign_object ${OPENSSL_LIBRARIES})
 
 find_package(CURL REQUIRED)
 include_directories(${CURL_INCLUDE_DIRS})
-target_link_libraries(dksign_executable ${CURL_LIBRARIES})
-target_link_libraries(dksign_library ${CURL_LIBRARIES})
-target_link_libraries(dksign_object ${CURL_LIBRARIES})
 
 find_package(nlohmann_json 3.2.0 REQUIRED)
 include_directories(${nlohmann_json_INCLUDE_DIRS})
-target_link_libraries(dksign_executable nlohmann_json::nlohmann_json)
-target_link_libraries(dksign_library nlohmann_json::nlohmann_json)
-target_link_libraries(dksign_object nlohmann_json::nlohmann_json)
-
-
-# find_package(ZLIB REQUIRED)
-# target_link_libraries(dksign_executable ZLIB::ZLIB)
-# target_link_libraries(dksign_library ZLIB::ZLIB)
-# target_link_libraries(dksign_object ZLIB::ZLIB)
 
 # Try to find the UUID library
 find_library(UUID_LIBRARY NAMES uuid)
 
-# Check if the UUID library was found
-if(UUID_LIBRARY)
-    message(STATUS "UUID library found: ${UUID_LIBRARY}")
-    # Add the UUID library to your target
-    target_link_libraries(dksign_executable ${UUID_LIBRARY})
-    target_link_libraries(dksign_library ${UUID_LIBRARY})
-    target_link_libraries(dksign_object ${UUID_LIBRARY})
-else()
-    message(FATAL_ERROR "UUID library not found. Please make sure the library is installed.")
-endif()
+
+target_link_libraries(besign_executable ${UUID_LIBRARY} nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS} ${Python3_LIBRARIES})
+target_link_libraries(besign_library ${UUID_LIBRARY} nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS} ${Python3_LIBRARIES})
+target_link_libraries(besign_object ${UUID_LIBRARY} nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS} ${Python3_LIBRARIES})
+
 
 # Define custom build directory
 set(CUSTOM_CYTHON_BUILD_DIR ${CMAKE_SOURCE_DIR}/cython_build)
@@ -175,14 +144,15 @@ endif()
 
 
 # Optionally, install the executable to the "bin" folder after building
-install(TARGETS dksign_executable DESTINATION bin)
+install(TARGETS besign_executable DESTINATION bin)
 
 install(FILES
-    build/bin/dksign
+    build/bin/besign
     DESTINATION ${BIN_DIR}
+    PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
 )
 
-install(TARGETS dksign_library
+install(TARGETS besign_library
     LIBRARY DESTINATION ${LIB_DIR}
 )
 
@@ -192,6 +162,7 @@ install(FILES
     header/get_ocsp_response.h
     header/sign_bsre.h
     header/sign_with_p12.h
+    header/sign.h
     header/cms.h
     header/detached_cms.h
     header/place_signature.h
@@ -218,19 +189,19 @@ install(FILES
     DESTINATION ${INCLUDE_DIR}
 )
 
-set_target_properties(dksign_library PROPERTIES
+set_target_properties(besign_library PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 
-set_target_properties(dksign_object PROPERTIES
+set_target_properties(besign_object PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/obj
 )
 
-set_target_properties(dksign_executable PROPERTIES
+set_target_properties(besign_executable PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
-set_target_properties(dksign_library dksign_object dksign_executable PROPERTIES OUTPUT_NAME dksign)
+set_target_properties(besign_library besign_object besign_executable PROPERTIES OUTPUT_NAME besign)
 
 
 
@@ -259,9 +230,3 @@ install(CODE "
     # Source the updated shell config
     execute_process(COMMAND /bin/sh -c \"source \${SHELL_RC}\")
 ")
-
-# Set compiler flags if needed
-# target_compile_options(besign PRIVATE -Wall -Wextra)
-
-# Set compiler features if needed
-# target_compile_features(besign PUBLIC cxx_std_11)

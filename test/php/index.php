@@ -2,15 +2,15 @@
 
 require_once 'class.php';
 
-$pdf_path = "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/input/Doc1.pdf";
-$image_path = "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/input/visualku.png";
-$output_path = "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/output/output.pdf";
-$p12Path = "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/input/usertesting.p12";
+$pdf_path = dirname(dirname(__DIR__)) . "/input/example.pdf";
+$image_path = dirname(dirname(__DIR__)) . "/input/image.png";
+$output_path = dirname(dirname(__DIR__)) . "/output/output.pdf";
+$p12Path = dirname(dirname(__DIR__)) . "/input/usertesting.p12";
 $nik = "3317080602970004";
 $passphraseBSrE = "Karya_Kampak123";
 $passphraseCert = "123456";
 $page = 1;
-$visibility = 1;
+$visibility = 0;
 $x = 100;
 $y = 100;
 $width = 128;

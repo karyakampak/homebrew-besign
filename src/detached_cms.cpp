@@ -84,8 +84,7 @@ std::string createDetachedCMS2(const std::string& data, const std::string& plain
 }
 
 
-
-std::string DetachedCMS::detached_cms(const std::string& hash, const std::string& data, const char* p12Path, const char* passphrase) {
+std::string DetachedCMS::detached_cms_file(const std::string& hash, const std::string& data, const char* p12Path, const char* passphrase) {
     try {
 
         Addons adns;
@@ -98,6 +97,45 @@ std::string DetachedCMS::detached_cms(const std::string& hash, const std::string
         std::string p12(p12Path);
         std::string password(passphrase);
         if (!adns.loadPKCS12_2(p12, password, privateKey, cert, ca)) {
+            std::cerr << "Failed to load PKCS#12 file" << std::endl;
+            return "";
+        }
+
+        // Create CMS and add certificate chain
+        std::string signature_hex = createDetachedCMS2(hash, data, privateKey, cert, ca);
+
+        // std::cout << "CMSNYA : " << signature_hex <<std::endl;
+
+        // Clean up
+        EVP_PKEY_free(privateKey);
+        X509_free(cert);
+        sk_X509_free(ca);
+
+        // std::cout << "CMS signed file created successfully" << std::endl;
+
+        return signature_hex;
+
+    } catch (const std::exception& ex) {
+        std::cerr << "Error: " << ex.what() << std::endl;
+        return "";
+    }
+
+    return "";
+}
+
+
+std::string DetachedCMS::detached_cms(const std::string& hash, const std::string& data, const std::vector<uint8_t>& p12, const char* passphrase) {
+    try {
+
+        Addons adns;
+        // Verifikasi vrfy;
+        
+        EVP_PKEY* privateKey = nullptr;
+        X509* cert = nullptr;
+        STACK_OF(X509)* ca = nullptr;
+
+        std::string password(passphrase);
+        if (!adns.loadPKCS12_from_base64(p12, password, privateKey, cert, ca)) {
             std::cerr << "Failed to load PKCS#12 file" << std::endl;
             return "";
         }

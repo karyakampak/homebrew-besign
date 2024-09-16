@@ -42,6 +42,9 @@ public:
     size_t get_offset(size_t pdf_awal_len, const std::vector<uint8_t>& pdf_akhir, const std::string& object_number);
     std::vector<uint8_t> sha256(const std::vector<uint8_t>& data);
     std::vector<uint8_t> hexStringToBytes(const std::string& hex);
+    bool save_pdf(const std::string& filename, const std::vector<uint8_t>& pdf_data);
+    bool has_pdf_extension(const std::string& filename);
+    std::string constant(const char* type);
 
 
 
@@ -53,6 +56,7 @@ public:
     std::string binaryToHex_2(const unsigned char* data, size_t length);
     void print_attribute_oid(const X509_ATTRIBUTE* attr);
     bool loadPKCS12_2(const std::string& pkcs12Path, const std::string& password, EVP_PKEY*& pkey, X509*& cert, STACK_OF(X509)*& ca);
+    bool loadPKCS12_from_base64(const std::vector<uint8_t>& pkcs12_vec, const std::string& password, EVP_PKEY*& pkey, X509*& cert, STACK_OF(X509)*& ca);
     std::vector<unsigned char> readData(std::string filePath);
     std::string digest(std::vector<unsigned char> data);
     std::string vectorToStringHex_2(const std::vector<uint8_t>& vec);

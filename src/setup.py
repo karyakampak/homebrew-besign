@@ -8,7 +8,7 @@ build_dir = os.getenv('CYTHON_BUILD_DIR', 'cython_build')
 
 setup(
     ext_modules = cythonize(
-        "src/helper.pyx",
+        "src/besign_helper.pyx",
         # language="c++",  # This tells Cython to generate C++ code
     ),
     include_dirs=[numpy.get_include()],  # Remove this line if you are not using numpy

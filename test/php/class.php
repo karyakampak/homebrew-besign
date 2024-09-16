@@ -215,7 +215,7 @@ class BeSign {
         char* place(const char* pdf_char, const char* signature_char, const char* catalog_char, const char* byteRange0_char, const char* byteRange1_char, const char* byteRange2_char, const char* byteRange3_char, const char* outputPath);
         void signWithP12(const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* p12Path, const char* passphrase, int isSeal);
         void signBSrE(const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* nik, const char* passphrase, const char* id, const char* secret, int isLTV, int isSeal);
-        ", "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/build/lib/libdksign.dylib");
+        ", "/Users/pusopskamsinas/Documents/Pribadi/Cpp/besign/build/lib/libbesign.dylib");
 
         $pdf_path = $this->pdf_path;
         $image_path = $this->image_path;
