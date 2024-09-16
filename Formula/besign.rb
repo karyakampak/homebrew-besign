@@ -7,7 +7,6 @@ class Besign < Formula
 
   depends_on "cmake" => :build
   depends_on "python" # Python 3 is installed via Homebrew and will be available for CMake
-  depends_on "pipx" # Python 3 is installed via Homebrew and will be available for CMake
   depends_on "opencv"
   depends_on "qrencode"
   depends_on "openssl"
@@ -19,9 +18,9 @@ class Besign < Formula
     # Install Python dependencies directly
     # Ensure pip is available
     python_version = Language::Python.major_minor_version "python3"
-    system "pip#{python_version}", "install", "fitz"
-    system "pip#{python_version}", "install", "qrcode"
-    system "pip#{python_version}", "install", "Pillow"
+    system "pip#{python_version}", "install", "--user", "fitz"
+    system "pip#{python_version}", "install", "--user", "qrcode"
+    system "pip#{python_version}", "install", "--user", "Pillow"
 
     cd "build" do
       system "cmake", "..", "-DCMAKE_BUILD_TYPE=Release", *std_cmake_args
