@@ -25,13 +25,13 @@ class Besign < Formula
       [global]
       break-system-packages = true
     EOS
-    
+
     # Install Python dependencies directly
     # Ensure pip is available
     python_version = Language::Python.major_minor_version "python3"
-    system "pip#{python_version}", "install", "--user", "fitz"
-    system "pip#{python_version}", "install", "--user", "qrcode"
-    system "pip#{python_version}", "install", "--user", "Pillow"
+    system "pip#{python_version}", "install", "fitz"
+    system "pip#{python_version}", "install", "qrcode"
+    system "pip#{python_version}", "install", "Pillow"
 
     cd "build" do
       system "cmake", "..", "-DCMAKE_BUILD_TYPE=Release", *std_cmake_args
