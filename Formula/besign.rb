@@ -1,4 +1,4 @@
-class Myprogram < Formula
+class Besign < Formula
   desc "My awesome program"
   homepage "https://github.com/karyakampak/besign"
   url "https://github.com/karyakampak/besign/archive/refs/tags/v1.0.0.tar.gz"
