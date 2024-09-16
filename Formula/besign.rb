@@ -12,7 +12,7 @@ class Besign < Formula
   depends_on "openssl"
   depends_on "curl"
   depends_on "nlohmann-json"
-  depends_on "uuid"
+  depends_on "ossp-uuid"
 
   def install
     # Install Python dependencies directly
@@ -21,7 +21,7 @@ class Besign < Formula
     system "pip#{python_version}", "install", "fitz"
     system "pip#{python_version}", "install", "qrcode"
     system "pip#{python_version}", "install", "Pillow"
-    
+
     cd "build" do
       system "cmake", "..", "-DCMAKE_BUILD_TYPE=Release", *std_cmake_args
       system "make"
