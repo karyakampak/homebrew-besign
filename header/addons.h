@@ -12,7 +12,9 @@
 #include <regex>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h> // Include this header for STACK_OF(X509_ATTRIBUTE)
-#include <cstdint>
+#include <openssl/sha.h>
+#include <openssl/asn1.h>
+#include <openssl/cms.h>
 
 // Class declaration
 class Addons {
@@ -40,6 +42,24 @@ public:
     size_t get_offset(size_t pdf_awal_len, const std::vector<uint8_t>& pdf_akhir, const std::string& object_number);
     std::vector<uint8_t> sha256(const std::vector<uint8_t>& data);
     std::vector<uint8_t> hexStringToBytes(const std::string& hex);
+
+
+
+
+
+    // Member function declaration
+    std::string base64_encode_2(const unsigned char* input, int length);
+    std::vector<uint8_t> base64_decode_2(const std::string& base64Data);
+    std::string binaryToHex_2(const unsigned char* data, size_t length);
+    void print_attribute_oid(const X509_ATTRIBUTE* attr);
+    bool loadPKCS12_2(const std::string& pkcs12Path, const std::string& password, EVP_PKEY*& pkey, X509*& cert, STACK_OF(X509)*& ca);
+    std::vector<unsigned char> readData(std::string filePath);
+    std::string digest(std::vector<unsigned char> data);
+    std::string vectorToStringHex_2(const std::vector<uint8_t>& vec);
+    std::string asn1_string_to_hex_string(const ASN1_STRING *asn1_string);
+    std::string get_digest_hex_from_signer_info(const CMS_SignerInfo* signer_info);
+    void find_and_replace(std::string &str, const std::string &to_find, const std::string &replace_with);
+    void handleErrors();
 };
 
 #endif

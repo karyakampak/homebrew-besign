@@ -1,8 +1,10 @@
 #include "../header/add_signature_dict.h"
 #include "../header/addons.h"
+#include "../header/visualization.h"
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+#include <cstdio>  // For std::remove
 #include <vector>
 #include <string>
 #include <unordered_map>
@@ -13,166 +15,51 @@
 #include <iomanip>
 #include <fstream>
 #include <zlib.h>
-#include <jpeglib.h>
-#include <png.h>
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "../header/stb_image_resize2.h"
+#include <opencv2/opencv.hpp>
+#include <qrencode.h>
+
+#define PIXEL_SIZE 10  // Scale of each QR code pixel block
 
 AddSignatureDict::AddSignatureDict() {
     // Initialize private member variables or perform any necessary setup
 }
 
-// Function to read JPEG file and extract image data into a vector<uint8_t>
-std::vector<uint8_t> readJPEG(const char* filename, int& width, int& height) {
-    std::vector<uint8_t> imageData;
 
-    // Open the JPEG file
-    FILE* infile = fopen(filename, "rb");
-    if (!infile) {
-        std::cerr << "Error: Failed to open " << filename << std::endl;
-        return imageData;
+void saveQRCodeAsJPG(const std::string &text, const std::string &filename) {
+    // Create the QR code
+    QRcode *qr = QRcode_encodeString(text.c_str(), 0, QR_ECLEVEL_H, QR_MODE_8, 1);
+    if (qr == nullptr) {
+        std::cerr << "Failed to generate QR code" << std::endl;
+        return;
     }
 
-    // Initialize the JPEG decompression structure
-    struct jpeg_decompress_struct cinfo;
-    struct jpeg_error_mgr jerr;
-    cinfo.err = jpeg_std_error(&jerr);
-    jpeg_create_decompress(&cinfo);
+    // Set the image size (QR code size * pixel scale)
+    int imageSize = qr->width * PIXEL_SIZE;
+    cv::Mat qrImage = cv::Mat::zeros(imageSize, imageSize, CV_8UC3);
 
-    // Specify the source file
-    jpeg_stdio_src(&cinfo, infile);
-
-    // Read file parameters
-    jpeg_read_header(&cinfo, TRUE);
-    jpeg_start_decompress(&cinfo);
-
-    // Get image dimensions
-    width = cinfo.output_width;
-    height = cinfo.output_height;
-    int numChannels = cinfo.num_components; // 3 for RGB, 1 for grayscale
-
-    // Allocate memory to store image data
-    size_t image_size = width * height * numChannels;
-    imageData.resize(image_size);
-
-    // Read scanlines
-    while (cinfo.output_scanline < cinfo.output_height) {
-        uint8_t* row_pointer = &imageData[cinfo.output_scanline * width * numChannels];
-        jpeg_read_scanlines(&cinfo, &row_pointer, 1);
+    // Fill the image with the QR code data
+    for (int y = 0; y < qr->width; y++) {
+        for (int x = 0; x < qr->width; x++) {
+            cv::Rect rect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+            if (qr->data[y * qr->width + x] & 1) {
+                cv::rectangle(qrImage, rect, cv::Scalar(0, 0, 0), cv::FILLED);  // Black for QR code modules
+            } else {
+                cv::rectangle(qrImage, rect, cv::Scalar(255, 255, 255), cv::FILLED);  // White background
+            }
+        }
     }
 
-    // Finish decompression
-    jpeg_finish_decompress(&cinfo);
-    jpeg_destroy_decompress(&cinfo);
-    fclose(infile);
-
-    return imageData;
-}// Function to read PNG file and extract image data into a vector<uint8_t>
-std::vector<uint8_t> readPNG(const char* filename, int& width, int& height) {
-    std::vector<uint8_t> imageData;
-
-    // Open the PNG file
-    FILE* infile = fopen(filename, "rb");
-    if (!infile) {
-        std::cerr << "Error: Failed to open " << filename << std::endl;
-        return imageData;
+    // Save the image as JPG
+    if (cv::imwrite(filename, qrImage)) {
+        // std::cout << "QR code saved as " << filename << std::endl;
+    } else {
+        std::cerr << "Failed to save the QR code as JPG" << std::endl;
     }
 
-    // Initialize PNG structures
-    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    if (!png_ptr) {
-        std::cerr << "Error: Failed to create PNG read struct" << std::endl;
-        fclose(infile);
-        return imageData;
-    }
-
-    png_infop info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr) {
-        std::cerr << "Error: Failed to create PNG info struct" << std::endl;
-        png_destroy_read_struct(&png_ptr, NULL, NULL);
-        fclose(infile);
-        return imageData;
-    }
-
-    // Set up error handling
-    if (setjmp(png_jmpbuf(png_ptr))) {
-        std::cerr << "Error: PNG error during read" << std::endl;
-        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-        fclose(infile);
-        return imageData;
-    }
-
-    // Initialize PNG IO
-    png_init_io(png_ptr, infile);
-    png_read_info(png_ptr, info_ptr);
-
-    // Get image dimensions
-    width = png_get_image_width(png_ptr, info_ptr);
-    height = png_get_image_height(png_ptr, info_ptr);
-    png_byte color_type = png_get_color_type(png_ptr, info_ptr);
-    png_byte bit_depth = png_get_bit_depth(png_ptr, info_ptr);
-
-    // Ensure 8-bit RGBA
-    if (bit_depth == 16)
-        png_set_strip_16(png_ptr);
-
-    if (color_type == PNG_COLOR_TYPE_PALETTE)
-        png_set_palette_to_rgb(png_ptr);
-
-    if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
-        png_set_expand_gray_1_2_4_to_8(png_ptr);
-
-    if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS))
-        png_set_tRNS_to_alpha(png_ptr);
-
-    if (color_type == PNG_COLOR_TYPE_RGB ||
-        color_type == PNG_COLOR_TYPE_GRAY ||
-        color_type == PNG_COLOR_TYPE_PALETTE)
-        png_set_filler(png_ptr, 0xFF, PNG_FILLER_AFTER);
-
-    if (color_type == PNG_COLOR_TYPE_GRAY ||
-        color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-        png_set_gray_to_rgb(png_ptr);
-
-    // Read the image data
-    png_read_update_info(png_ptr, info_ptr);
-    size_t row_bytes = png_get_rowbytes(png_ptr, info_ptr);
-    imageData.resize(row_bytes * height);
-    png_bytep* row_pointers = new png_bytep[height];
-    for (int y = 0; y < height; y++) {
-        row_pointers[y] = imageData.data() + (y * row_bytes);
-    }
-    png_read_image(png_ptr, row_pointers);
-
-    // Clean up
-    delete[] row_pointers;
-    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-    fclose(infile);
-
-    return imageData;
-}
-
-// Function to compress data using zlib
-std::vector<uint8_t> compressData(const std::vector<uint8_t>& inputData) {
-    std::vector<uint8_t> compressedData;
-
-    // Prepare output buffer with initial size (provide an estimate for expected compressed size)
-    uLongf compressedSize = compressBound(inputData.size());
-    compressedData.resize(compressedSize);
-
-    // Compress data
-    int ret = compress(reinterpret_cast<Bytef*>(compressedData.data()), &compressedSize,
-                       reinterpret_cast<const Bytef*>(inputData.data()), inputData.size());
-    if (ret != Z_OK) {
-        std::cerr << "Error: Compression failed with error code " << ret << std::endl;
-        std::vector<uint8_t> emptyVector;
-        return emptyVector;
-    }
-
-    // Resize vector to actual compressed size
-    compressedData.resize(compressedSize);
-
-    return compressedData;
+    // Clean up QR code
+    QRcode_free(qr);
 }
 
 
@@ -366,40 +253,35 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
     std::vector<unsigned char> img_dict_signature;
     if (visibility == 1) {
 
+
+        // std::string text = "https://bsre-bssn.go.id";
+        // std::string filename = std::to_string(milliseconds)+".jpg";
+        // saveQRCodeAsJPG(text, filename);
+
         std::ifstream image_file(input_image_path_string, std::ios::binary);
+        // std::ifstream image_file(filename.c_str(), std::ios::binary);
         if (image_file) {
 
 
+            std::vector<unsigned char> image_data((std::istreambuf_iterator<char>(image_file)),
+                                                std::istreambuf_iterator<char>());
+
             int widthImage, heightImage, channels;
+            // std::vector<uint8_t> imageData = adns.decodePNG(filename.c_str(), widthImage, heightImage, channels);
             std::vector<uint8_t> imageData = adns.decodePNG(input_image_path_string, widthImage, heightImage, channels);
 
-            // Read JPEG file and get image data
-            // std::vector<uint8_t> imageData = readPNG(input_image_path_string, widthImage, heightImage);
-            // if (imageData.empty()) {
-            //     std::cerr << "Error: Failed to read JPEG file." << std::endl;
-            // }
 
-            // std::vector<uint8_t> imageData;
 
-            // // Call stbir_resize_uint8 to resize the image
-            // int result = stbir_resize_uint8_linear(imageData_xxx.data(), widthImage, heightImage, 0,
-            //                                 imageData.data(), widthImage/3, heightImage/3, 0, channels);
-            
-            // // Correct image orientation (flip vertically if needed)
-            // // (Assuming imageData is RGBA format, 4 bytes per pixel)
-            // const int bytesPerPixel = 4;
-            // std::vector<uint8_t> correctedImageData(imageData_xxx.size());
-            // for (int y = 0; y < heightImage; ++y) {
-            //     memcpy(correctedImageData.data() + ((heightImage - 1 - y) * widthImage * bytesPerPixel),
-            //         imageData_xxx.data() + (y * widthImage * bytesPerPixel),
-            //         widthImage * bytesPerPixel);
-            // }
+            Visualization vzsl;
+            // std::vector<double> positions = vzsl.get_position("/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/input/Doc1.pdf", 0, "#");
 
-            // Compress image data using zlib
-            // std::vector<uint8_t> imageData = compressData(imageDataXXX);
-            // if (imageData.empty()) {
-            //     std::cerr << "Error: Failed to compress image data." << std::endl;
-            // }
+            std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+            std::string visualization_string(visualization.begin(), visualization.end());
+            // std::cout << visualization_string << std::endl;
+
+            // Jika menggunnakan tanda #
+            // x = positions[0];
+            // y = positions[1];
 
             float rectWidth;
             float rectHeight;
@@ -413,6 +295,10 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
                 rectHeight = (rectWidth/widthImage)*heightImage;
                 y = y + ((height-rectHeight)/2);
             }
+
+            // Jika menggunnakan tanda #
+            // x = positions[0] - (rectWidth/2);
+            // y = positions[1] - (rectHeight/2);
             
 
             annot_dict = object_annot_start + "/Type /Annot\n/Subtype /Widget\n/FT /Sig\n/Rect [" + std::to_string(x) + " " + std::to_string(y) + " " + std::to_string(x + rectWidth) + " " + std::to_string(y+rectHeight) +  "]\n/AP <<\n/N " + std::to_string(max_index + 5) + " 0 R\n>>\n/V " + std::to_string(max_index + 1) + " 0 R\n/T (Signature_" + std::to_string(milliseconds) + ")\n/F 4\n/P " + object_page_ref_annot + object_annot_end;
@@ -425,18 +311,17 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
             float heightSign = static_cast<float>(heightImage) / (heightImage/rectHeight); // Convert numerator to float before division
 
             // Copy the contents into a vector
-            std::vector<unsigned char> vec(str.begin(), str.end());
-
-            std::vector<unsigned char> image_content((std::istreambuf_iterator<char>(image_file)), std::istreambuf_iterator<char>());
+            std::vector<unsigned char> vec(visualization_string.begin(), visualization_string.end());
 
             std::string img_obj_0_start = "\n\n" + std::to_string(max_index + 5) + " 0 obj\n";
             std::string img_obj_0_end = "\nendobj";
-            std::string stream_obj_0 = "q\nq\n"+std::to_string(widthSign)+" 0 0 -"+std::to_string(heightSign)+" 0 "+std::to_string(heightSign)+" cm\n/X" + std::to_string(milliseconds) + " Do\nQ\n1 0 0 1 "+std::to_string(widthSign)+" "+std::to_string(heightSign)+" cm\nQ\n";
-            // std::string stream_obj_0 = "q\n1 0 0 1 0 0 cm\n1 0 0 -1 0 "+std::to_string(heightSign)+" cm\n/X1 Do\nQ\n0 0 0 RG\n3 w\n0 0 128 45.375 re\nS\n";
+            std::string stream_obj_0 = "q\nq\n"+std::to_string(widthSign)+" 0 0 "+std::to_string(heightSign)+" 0 0 cm\n/X" + std::to_string(milliseconds) + " Do\nQ\n1 0 0 1 "+std::to_string(widthSign)+" "+std::to_string(heightSign)+" cm\nQ\n";
+            // std::string stream_obj_0 = "q\nq\n"+std::to_string(widthSign)+" 0 0 -"+std::to_string(heightSign)+" 0 "+std::to_string(heightSign)+" cm\n/X" + std::to_string(milliseconds) + " Do\nQ\n1 0 0 1 "+std::to_string(widthSign)+" "+std::to_string(heightSign)+" cm\nQ\n";
             std::string img_obj_0_dict = img_obj_0_start + "<<\n/Length " + std::to_string(stream_obj_0.size()) + "\n/Type /XObject\n/Subtype /Form\n/Resources <<\n/XObject <<\n/X" + std::to_string(milliseconds) + " " + std::to_string(max_index + 6) + " 0 R\n>>\n>>\n/FormType 1\n/BBox [0.0 0.0 "+std::to_string(widthSign)+" "+std::to_string(heightSign)+"]\n/Matrix [1 0 0 1 0 0]\n>>\nstream\n" + stream_obj_0 + "\nendstream" + img_obj_0_end;
             std::string img_obj_1_start = "\n\n" + std::to_string(max_index + 6) + " 0 obj\n<<\n";
             std::string img_obj_1_end = "\nendobj";
-            std::string img_obj_1_dict_1 = img_obj_1_start + "/Type /XObject\n/Subtype /Image\n/Width " + std::to_string(widthImage) + "\n/Height " + std::to_string(heightImage) + "\n/ColorSpace /DeviceRGB\n/BitsPerComponent 8\n/Length " + std::to_string(imageData.size()) + "\n>>\nstream\n";
+            std::string img_obj_1_dict_1 = img_obj_1_start + "/Type /XObject\n/Subtype /Image\n/Filter /DCTDecode\n/Width " + std::to_string(widthImage) + "\n/Height " + std::to_string(heightImage) + "\n/ColorSpace /DeviceRGB\n/BitsPerComponent 8\n/Length " + std::to_string(imageData.size()) + "\n>>\nstream\n";
+            // std::string img_obj_1_dict_1 = img_obj_1_start + "/Type /XObject\n/Subtype /Image\n/Width " + std::to_string(widthImage) + "\n/Height " + std::to_string(heightImage) + "\n/ColorSpace /DeviceRGB\n/BitsPerComponent 8\n/Length " + std::to_string(imageData.size()) + "\n>>\nstream\n";
             std::string img_obj_1_dict_2 = "\nendstream" + img_obj_1_end;
             std::vector<unsigned char> img_obj_final_vec;
             img_obj_final_vec.insert(img_obj_final_vec.end(), img_obj_0_dict.begin(), img_obj_0_dict.end());
@@ -445,9 +330,18 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
             img_obj_final_vec.insert(img_obj_final_vec.end(), img_obj_1_dict_2.begin(), img_obj_1_dict_2.end());
 
             img_dict_signature = img_obj_final_vec;
+
         } else {
             std::cerr << "Error reading from the input image file" << std::endl;
         }
+
+
+        // if (std::remove(filename.c_str()) != 0) {
+        //     std::perror("Error deleting file");
+        // } else {
+        //     std::cout << "File successfully deleted\n";
+        // }
+        
     } else {
         annot_dict = object_annot_start + "/Type /Annot\n/Subtype /Widget\n/FT /Sig\n/Rect [0 0 0 0]\n/V " + std::to_string(max_index + 1) + " 0 R\n/T (Signature_" + std::to_string(milliseconds) + ")\n/F 4\n/P " + object_page_ref_annot + object_annot_end;
     }

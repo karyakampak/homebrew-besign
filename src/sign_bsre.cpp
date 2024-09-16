@@ -557,6 +557,28 @@ std::unordered_map<std::string, std::vector<uint8_t> > SignBSrE::sign(std::vecto
     std::string bsHash = adns.base64_encode(sha256_digest, SHA256_DIGEST_LENGTH);
 
 
+    std::ofstream outFile("/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/output/data_to_sign.pdf", std::ios::out | std::ios::binary);
+    if (!outFile) {
+        std::cerr << "\nError opening file: " << "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/output/data_to_sign.pdf" << std::endl;
+        // return;
+    }
+
+    // Write the PDF buffer to the file
+    outFile.write(reinterpret_cast<const char*>(data_to_sign.data()), data_to_sign.size());
+
+    // Check if writing was successful
+    if (!outFile) {
+        std::cerr << "\nError writing to file: " << "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/output/data_to_sign.pdf" << std::endl;
+    } else {
+        std::cout << "\nPDF saved to: " << "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/output/data_to_sign.pdf" << std::endl;
+    }
+
+    // Close the file
+    outFile.close();
+
+    std::cout<< "Hash : " << bsHash << std::endl; 
+
+
     std::unordered_map<std::string, std::vector<uint8_t>> signature_vector = get_signature(bsHash, nik, passphrase, id, secret);
     std::string signature(signature_vector.at("signature").begin(), signature_vector.at("signature").end());
     

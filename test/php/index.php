@@ -2,7 +2,7 @@
 
 require_once 'class.php';
 
-$pdf_path = "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/input/example.pdf";
+$pdf_path = "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/input/Doc1.pdf";
 $image_path = "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/input/visualku.png";
 $output_path = "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/output/output.pdf";
 $p12Path = "/Users/pusopskamsinas/Documents/Pribadi/Cpp/dksign_v2/input/usertesting.p12";
