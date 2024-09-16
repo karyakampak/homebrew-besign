@@ -34,7 +34,7 @@ class Besign < Formula
     system "pip#{python_version}", "install", "Pillow"
 
     cd "build" do
-      system "cmake", "..", "-DCMAKE_BUILD_TYPE=Release", *std_cmake_args
+      system "cmake", "..", *std_cmake_args
       system "make"
       system "make", "install"
     end
