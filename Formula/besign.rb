@@ -6,6 +6,7 @@ class Besign < Formula
   license "MIT"
 
   depends_on "cmake" => :build
+  depends_on "python"
   depends_on "opencv"
   depends_on "qrencode"
   depends_on "openssl"
