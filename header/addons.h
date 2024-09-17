@@ -45,6 +45,15 @@ public:
     bool save_pdf(const std::string& filename, const std::vector<uint8_t>& pdf_data);
     bool has_pdf_extension(const std::string& filename);
     std::string constant(const char* type);
+    std::string size_t_to_string(size_t value);
+    std::string vector_size_t_to_string(const std::vector<size_t>& input);
+    std::vector<unsigned char> saveQRCodeAsJPG(const std::string &text, const std::string &filename);
+    std::vector<unsigned char> saveQRCodeAsJPG_2(const std::string &text);
+    std::string get_page(const std::vector<uint8_t>& pdf_content, const std::string& object_page_ref);
+    bool containsAnnots(const std::vector<uint8_t>& pdfData);
+    std::unordered_map<std::string, std::string> checkAnnotOnPage(std::string page_dict);
+    std::string get_catalog(const std::vector<uint8_t>& pdf_content, const std::unordered_map<std::string, std::string>& read_pdf);
+    size_t extract_integer(const std::string& input);
 
 
 

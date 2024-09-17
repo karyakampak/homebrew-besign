@@ -2,6 +2,7 @@
 // Define the Car class
 class BeSign {
     // Properties
+    public $type;
     public $pdf_path;
     public $image_path;
     public $output_path;
@@ -21,7 +22,8 @@ class BeSign {
     public $isSeal;
 
     // Constructor
-    public function __construct($pdf_path, $image_path, $output_path, $p12Path, $nik, $passphraseBSrE, $passphraseCert, $page, $visibility, $x, $y, $width, $height, $id, $secret, $isLTV, $isSeal) {
+    public function __construct($type, $pdf_path, $image_path, $output_path, $p12Path, $nik, $passphraseBSrE, $passphraseCert, $page, $visibility, $x, $y, $width, $height, $id, $secret, $isLTV, $isSeal) {
+        $this->type = $type;
         $this->pdf_path = $pdf_path;
         $this->image_path = $image_path;
         $this->output_path = $output_path;
@@ -210,13 +212,14 @@ class BeSign {
     public function sign() {
 
         $ffi = FFI::cdef("
-        char* placeHolder(const char* pdf_path, const char* image_path, int page, int visibility, float x, float y, float width, float height, int isSeal);
+        char* placeHolder(int type, const char* pdf_path, const char* image_path, int page, int visibility, float x, float y, float width, float height, int isSeal);
         void free_string(const char* buffer);
         char* place(const char* pdf_char, const char* signature_char, const char* catalog_char, const char* byteRange0_char, const char* byteRange1_char, const char* byteRange2_char, const char* byteRange3_char, const char* outputPath);
-        void signWithP12(const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* p12Path, const char* passphrase, int isSeal);
-        void signBSrE(const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* nik, const char* passphrase, const char* id, const char* secret, int isLTV, int isSeal);
+        void signWithP12(int type, const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* p12Path, const char* passphrase, int isSeal);
+        void signBSrE(int type, const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* nik, const char* passphrase, const char* id, const char* secret, int isLTV, int isSeal);
         ", "/Users/pusopskamsinas/Documents/Pribadi/Cpp/besign/build/lib/libbesign.dylib");
 
+        $type = $this->type;
         $pdf_path = $this->pdf_path;
         $image_path = $this->image_path;
         $output_path = $this->output_path;
@@ -235,9 +238,9 @@ class BeSign {
         $isLTV = $this->isLTV;
         $isSeal = $this->isSeal;
 
-        // $result = $ffi->placeHolder($pdf_path, $image_path, $page, $visibility, $x, $y, $width, $height, $isSeal);
-        $ffi->signWithP12($pdf_path, $image_path, $output_path, $page, $visibility, $x, $y, $width, $height, $p12Path, $passphraseCert, $isSeal);
-        // $ffi->signBSrE($pdf_path, $image_path, $output_path, $page, $visibility, $x, $y, $width, $height, $nik, $passphraseBSrE, $id, $secret, $isLTV, $isSeal);
+        // $result = $ffi->placeHolder($type, $pdf_path, $image_path, $page, $visibility, $x, $y, $width, $height, $isSeal);
+        $ffi->signWithP12($type, $pdf_path, $image_path, $output_path, $page, $visibility, $x, $y, $width, $height, $p12Path, $passphraseCert, $isSeal);
+        // $ffi->signBSrE($type, $pdf_path, $image_path, $output_path, $page, $visibility, $x, $y, $width, $height, $nik, $passphraseBSrE, $id, $secret, $isLTV, $isSeal);
 
 
         // $php_string = FFI::string($result);

@@ -32,10 +32,10 @@ extern "C" {
         free((void*)buffer);
     }
 
-    char* placeHolder(const char* pdf_path, const char* image_path, int page, int visibility, float x, float y, float width, float height, int isSeal){
+    char* placeHolder(int type, const char* pdf_path, const char* image_path, int page, int visibility, float x, float y, float width, float height, int isSeal){
 
         AddPlaceHolder addPlaceHolder;
-        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(pdf_path, image_path, page, visibility, x, y, width, height, isSeal);
+        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, image_path, page, visibility, x, y, width, height, isSeal);
         std::string placedHolder = placeholderData.at("placedHolder");
         std::string catalogDict = placeholderData.at("catalog_dict");
 
@@ -107,10 +107,10 @@ extern "C" {
         return cstr;
     }
     
-    void sampleSign(const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* p12Path, const char* passphrase, int isSeal){
+    void sampleSign(int type, const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* p12Path, const char* passphrase, int isSeal){
 
         AddPlaceHolder addPlaceHolder;
-        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(pdf_path, image_path, page, visibility, x, y, width, height, isSeal);
+        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, image_path, page, visibility, x, y, width, height, isSeal);
         std::string placedHolder = placeholderData.at("placedHolder");
         std::string catalogDict = placeholderData.at("catalog_dict");
 
@@ -122,10 +122,10 @@ extern "C" {
         svpdf.savePDF(signed_pdf, output_path);
     }
 
-    void signWithP12(const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* p12Path, const char* passphrase, int isSeal){
+    void signWithP12(int type, const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* p12Path, const char* passphrase, int isSeal){
 
         AddPlaceHolder addPlaceHolder;
-        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(pdf_path, image_path, page, visibility, x, y, width, height, isSeal);
+        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, image_path, page, visibility, x, y, width, height, isSeal);
         std::string placedHolder = placeholderData.at("placedHolder");
         std::string catalogDict = placeholderData.at("catalog_dict");
 
@@ -137,10 +137,10 @@ extern "C" {
         svpdf.savePDF(signed_pdf, output_path);
     }
 
-    void signBSrE(const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* nik, const char* passphrase, const char* id, const char* secret, int isLTV, int isSeal){
+    void signBSrE(int type, const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* nik, const char* passphrase, const char* id, const char* secret, int isLTV, int isSeal){
 
         AddPlaceHolder addPlaceHolder;
-        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(pdf_path, image_path, page, visibility, x, y, width, height, isSeal);
+        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, image_path, page, visibility, x, y, width, height, isSeal);
         std::string placedHolder = placeholderData.at("placedHolder");
         std::string catalogDict = placeholderData.at("catalog_dict");
 
@@ -185,8 +185,26 @@ extern "C" {
 
 
 int main(int argc, char* argv[]) {
+    std::string version = "besign v1.0.0";
+    std::string help = "HELP\n\nStandart commands :\ncreate <filename.pdf>\nsign <filename.pdf>\n";
     // Check if enough arguments are passed (including the program name)
-    if (argc >= 3) {
+    if (argc == 1) {
+        std::cout << "Usage: besign <command> <filename.pdf>" << std::endl;
+        return 1;  // Return error code if the file exists
+    }
+    if (argc == 2) {
+        std::string command = argv[1];  // First argument ("create")
+        if (command == "version" || command == "-version" || command == "--version" || command == "-v" || command == "-V") {
+            std::cout << version << std::endl;
+        } else if (command == "help" || command == "-help" || command == "--help" || command == "-h" || command == "-H") {
+            std::cout << help << std::endl;
+        } else {
+            std::cout << "Usage: besign <command> <filename.pdf>" << std::endl;
+            return 1;  // Return error code if the file exists
+        }
+        
+    }
+    if (argc == 3) {
         Addons adns;
         std::string command = argv[1];  // First argument ("create")
         std::string filename = argv[2]; // Second argument ("pdf")
@@ -210,13 +228,17 @@ int main(int argc, char* argv[]) {
         } else if (command == "sign") {
             // Check if the file exists using filesystem
             if (std::filesystem::exists(filename)) {
-                std::cout << "Error: File already exists.\n";
+                std::cout << "PDF saved successfully";
             } else {
                 std::cout << "File not exist" << std::endl;
                 return 1;  // Return error code if the file exists
             }
+        } else {
+            std::cout << "Usage: besign <command> <filename.pdf>" << std::endl;
+            return 1;  // Return error code if the file exists
         }
-    } else {
+    }
+    if (argc >= 3) {
         std::cout << "Usage: besign <command> <filename.pdf>" << std::endl;
         return 1;  // Return error code if the file exists
     }
