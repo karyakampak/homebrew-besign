@@ -1,13 +1,13 @@
 class Besign < Formula
-  desc "Program for make signature object on pdf"
+  desc "Program for make signature object on pdf"  
   homepage "https://github.com/karyakampak/homebrew-besign"
   url "https://github.com/karyakampak/homebrew-besign/archive/refs/tags/v1.0.4.tar.gz"
   sha256 "50e6264287c7512b91176aa240dcc637718fb6b99f7977bc993fd7bc1e831923"
   license "MIT"
 
   depends_on "cmake" => :build
-  # depends_on "python@3"
-  # depends_on "opencv"
+  depends_on "python@3"
+  depends_on "opencv"
   depends_on "qrencode"
   depends_on "openssl"
   depends_on "curl"
@@ -16,7 +16,19 @@ class Besign < Formula
 
 
   def install
+    python3 = Formula["python@3"].opt_bin/"python3"
+    pip = Formula["python@3"].opt_bin/"pip3"
+    venv_path = buildpath/"venv"
+
+    # Create and activate a virtual environment
+    system "#{python3}", "-m", "venv", venv_path
+    system "#{venv_path}/bin/pip", "install", "setuptools", "Cython", "numpy", "pymupdf", "qrcode[pil]", "pillow"
+
     cd "build" do
+      # Set environment variables to use the virtual environment
+      ENV["PYTHONPATH"] = "#{venv_path}/lib/python#{Formula["python@3"].version.major_minor}/site-packages"
+      ENV.prepend_path "PATH", "#{venv_path}/bin"
+
       system "cmake", "..", *std_cmake_args
       system "make"
       system "make", "install"
@@ -27,4 +39,3 @@ class Besign < Formula
     system "#{bin}/besign", "--version"
   end
 end
-
