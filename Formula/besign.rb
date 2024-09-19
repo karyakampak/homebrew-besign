@@ -29,7 +29,8 @@ class Besign < Formula
 
     cd "build" do
       # Set environment variables to use the virtual environment
-      ENV["PYTHONPATH"] = "#{venv_path}/lib/python#{Formula["python@3"].version.major_minor}/site-packages"
+      site_packages = "#{venv_path}/lib/python#{Formula["python@3"].version.major_minor}/site-packages"
+      ENV["PYTHONPATH"] = site_packages
       ENV.prepend_path "PATH", "#{venv_path}/bin"
 
       system "cmake", "..",  "-DPYTHON_EXECUTABLE=#{venv_path}/bin/python3", *std_cmake_args
@@ -39,7 +40,7 @@ class Besign < Formula
 
     # Ensure PYTHONPATH is set correctly when besign runs
     bin.env_script_all_files(libexec/"bin", :PYTHONPATH => site_packages)
-    
+
   end
 
   test do
