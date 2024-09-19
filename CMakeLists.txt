@@ -127,16 +127,43 @@ target_link_libraries(besign_object ${UUID_LIBRARY} nlohmann_json::nlohmann_json
 
 
 # Define custom build directory
-set(CUSTOM_CYTHON_BUILD_DIR ${CMAKE_SOURCE_DIR}/cython_build)
+set(CUSTOM_CYTHON_BUILD_DIR "${CMAKE_BINARY_DIR}/cython_build")
+
+# Set the virtual environment path
+set(VENV_PATH "${CMAKE_BINARY_DIR}/venv")
+
+# Create a custom command to ensure required Python packages (like pymupdf) are installed
+add_custom_target(
+    install_python_deps ALL
+    COMMAND ${Python3_EXECUTABLE} -m venv ${VENV_PATH}
+    COMMAND ${VENV_PATH}/bin/pip install --upgrade pip
+    COMMAND ${VENV_PATH}/bin/pip install Cython pymupdf numpy qrcode[pil] pillow
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Setting up Python virtual environment and installing dependencies"
+)
 
 # Add custom command to build the Cython extension
 add_custom_target(
     cython_module ALL
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/src/setup.py build_ext --inplace
+    COMMAND ${VENV_PATH}/bin/python ${CMAKE_SOURCE_DIR}/src/setup.py build_ext --inplace
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Building Cython extension"
-    ENVIRONMENT "CYTHON_BUILD_DIR=${CUSTOM_CYTHON_BUILD_DIR}"
+    DEPENDS install_python_deps
 )
+
+# Set the environment variable PYTHONPATH for correct module import
+set(ENV{PYTHONPATH} "${VENV_PATH}/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages")
+
+# Build the project using CMake
+add_custom_target(
+    install_besign
+    COMMAND ${VENV_PATH}/bin/python ${CMAKE_SOURCE_DIR}/src/setup.py install
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Installing Cython module"
+)
+
+# Ensure that the cython_module is built before running cmake build
+add_dependencies(install_besign cython_module)
 
 # Determine platform-specific include and lib directories
 if(APPLE)
