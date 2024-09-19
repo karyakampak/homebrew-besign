@@ -24,6 +24,9 @@ class Besign < Formula
     system "#{python3}", "-m", "venv", venv_path
     system "#{venv_path}/bin/pip", "install", "setuptools", "Cython", "numpy", "pymupdf", "qrcode[pil]", "pillow"
 
+    # Ensure pymupdf (fitz) is correctly installed
+    system "#{venv_path}/bin/python3", "-c", "import fitz"
+
     cd "build" do
       # Set environment variables to use the virtual environment
       ENV["PYTHONPATH"] = "#{venv_path}/lib/python#{Formula["python@3"].version.major_minor}/site-packages"
