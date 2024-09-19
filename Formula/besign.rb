@@ -27,6 +27,14 @@ class Besign < Formula
     # Ensure pymupdf (fitz) is correctly installed
     system "#{venv_path}/bin/python3", "-c", "import fitz"
 
+    # Compile Cython files, if necessary
+    cd "src" do
+      system "#{venv_path}/bin/python3", "setup.py", "build_ext", "--inplace"
+    end
+
+    # Ensure 'besign_helper' is installed correctly
+    system "#{venv_path}/bin/python3", "setup.py", "install"
+
     # Set environment variables to use the virtual environment
     site_packages = "#{venv_path}/lib/python#{Formula["python@3"].version.major_minor}/site-packages"
 
