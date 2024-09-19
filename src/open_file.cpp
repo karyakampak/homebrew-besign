@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <mupdf/fitz.h>
 
 OpenFile::OpenFile() {
     // Initialize private member variables or perform any necessary setup
@@ -68,7 +69,7 @@ std::vector<uint8_t> get_decrypted_pdf(const std::vector<uint8_t>& pdf_data, con
     return result;
 }
 
-std::vector<uint8_t> OpenFile::open(const char* path) {
+std::vector<uint8_t> OpenFile::open(const char* path, int isProtected) {
         // Open file stream
         std::ifstream fileStream(path, std::ios::binary);
         if (!fileStream.is_open()) {
@@ -89,18 +90,20 @@ std::vector<uint8_t> OpenFile::open(const char* path) {
         // Close file stream
         fileStream.close();
 
+        if(isProtected == 1){
 
-        // // Example usage
-        // std::string password = "karyakampak";
-        // std::vector<uint8_t> decrypted_pdf = get_decrypted_pdf(fileContent, password);
+            // Example usage
+            std::string password = "karyakampak";
+            std::vector<uint8_t> decrypted_pdf = get_decrypted_pdf(fileContent, password);
 
-        // if (!decrypted_pdf.empty()) {
-        //     std::cout << "Decrypted PDF size: " << decrypted_pdf.size() << " bytes\n";
-        //     // Further processing of decrypted_pdf
-        // } else {
-        //     std::cerr << "Failed to decrypt PDF.\n";
-        // }
+            if (!decrypted_pdf.empty()) {
+                std::cout << "Decrypted PDF size: " << decrypted_pdf.size() << " bytes\n";
+                // Further processing of decrypted_pdf
+            } else {
+                std::cerr << "Failed to decrypt PDF.\n";
+            }
+            return decrypted_pdf;
+        }
 
         return fileContent;
-        // return decrypted_pdf;
 }

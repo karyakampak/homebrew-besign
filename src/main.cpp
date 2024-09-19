@@ -32,10 +32,10 @@ extern "C" {
         free((void*)buffer);
     }
 
-    char* placeHolder(int type, const char* pdf_path, const char* image_path, int page, int visibility, float x, float y, float width, float height, int isSeal){
+    char* placeHolder(int type, const char* pdf_path, int isProtected, const char* character, const char* imageorurl, int page, float x, float y, float width, float height, int isSeal){
 
         AddPlaceHolder addPlaceHolder;
-        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, image_path, page, visibility, x, y, width, height, isSeal);
+        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, isProtected, character, imageorurl, page, x, y, width, height, isSeal);
         std::string placedHolder = placeholderData.at("placedHolder");
         std::string catalogDict = placeholderData.at("catalog_dict");
 
@@ -107,10 +107,10 @@ extern "C" {
         return cstr;
     }
     
-    void sampleSign(int type, const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* p12Path, const char* passphrase, int isSeal){
-
+    void sampleSign(int type, const char* pdf_path, const char* character, const char* imageorurl, int page, float x, float y, float width, float height, int isSeal){
+        std::string output = "output.pdf";
         AddPlaceHolder addPlaceHolder;
-        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, image_path, page, visibility, x, y, width, height, isSeal);
+        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, 0, character, imageorurl, page, x, y, width, height, isSeal);
         std::string placedHolder = placeholderData.at("placedHolder");
         std::string catalogDict = placeholderData.at("catalog_dict");
 
@@ -119,13 +119,13 @@ extern "C" {
         std::vector<uint8_t> signed_pdf = sgn.sign(holder);
 
         SavePdf svpdf;
-        svpdf.savePDF(signed_pdf, output_path);
+        svpdf.savePDF(signed_pdf, output.c_str());
     }
 
-    void signWithP12(int type, const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* p12Path, const char* passphrase, int isSeal){
+    void signWithP12(int type, const char* pdf_path, int isProtected, const char* character, const char* imageorurl, const char* output_path, int page, float x, float y, float width, float height, const char* p12Path, const char* passphrase, int isSeal){
 
         AddPlaceHolder addPlaceHolder;
-        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, image_path, page, visibility, x, y, width, height, isSeal);
+        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, isProtected, character, imageorurl, page, x, y, width, height, isSeal);
         std::string placedHolder = placeholderData.at("placedHolder");
         std::string catalogDict = placeholderData.at("catalog_dict");
 
@@ -137,10 +137,10 @@ extern "C" {
         svpdf.savePDF(signed_pdf, output_path);
     }
 
-    void signBSrE(int type, const char* pdf_path, const char* image_path, const char* output_path, int page, int visibility, float x, float y, float width, float height, const char* nik, const char* passphrase, const char* id, const char* secret, int isLTV, int isSeal){
+    void signBSrE(int type, const char* pdf_path, int isProtected, const char* character, const char* imageorurl, const char* output_path, int page, float x, float y, float width, float height, const char* nik, const char* passphrase, const char* id, const char* secret, int isLTV, int isSeal){
 
         AddPlaceHolder addPlaceHolder;
-        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, image_path, page, visibility, x, y, width, height, isSeal);
+        std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, isProtected, character, imageorurl, page, x, y, width, height, isSeal);
         std::string placedHolder = placeholderData.at("placedHolder");
         std::string catalogDict = placeholderData.at("catalog_dict");
 
@@ -183,6 +183,27 @@ extern "C" {
 
 }
 
+void displayType() {
+    std::cout << "\n=== Tipe ===\n";
+    std::cout << "1. Tanda Tangan\n";
+    std::cout << "2. Segel\n";
+    std::cout << "Pilih tipe (1/2): ";
+}
+
+void displayJenis(std::string tipe) {
+    std::cout << "\n=== Jenis " << tipe << " ===\n";
+    std::cout << "1. Invisible\n";
+    std::cout << "2. Visualisai Gambar\n";
+    std::cout << "3. Visualisasi QRCode\n";
+    std::cout << "4. Posisikan gambar pada karakter\n";
+    std::cout << "5. Posisikan QRCode pada karakter\n";
+    std::cout << "Pilih jenis tanda tangan (1/2/3/4/5): ";
+}
+
+void sgn(int type, const char* pdf_path, const char* character, const char* imageorurl, int page, float x, float y, float width, float height, int isSeal){
+    sampleSign(type, pdf_path, character, imageorurl, page, x, y, width, height, isSeal);
+}
+
 
 int main(int argc, char* argv[]) {
     std::string version = "besign v1.0.0";
@@ -217,6 +238,7 @@ int main(int argc, char* argv[]) {
                 std::vector<uint8_t> pdf_vec = adns.base64_decode(pdf);
                 if (adns.save_pdf(output_filename, pdf_vec)) {
                     std::cout << "PDF saved successfully to '" << output_filename << "'\n";
+                    return 0;
                 } else {
                     std::cerr << "Failed to save the PDF.\n";
                     return 1;  // Return error code if the file exists
@@ -226,9 +248,97 @@ int main(int argc, char* argv[]) {
                 return 1;  // Return error code if the file exists
             }
         } else if (command == "sign") {
+            std::string dummy = "";
+            float fdummy = 50;
+            int tipe;
+            std::string tipe_str;
+            int jenis;
+            std::string imageorurl;
+            std::string posisi;
+            std::string karakter;
+            int page;
+            float x;
+            float y;
+            float width;
+            float height;
+            float isSeal;
             // Check if the file exists using filesystem
             if (std::filesystem::exists(filename)) {
-                std::cout << "PDF saved successfully";
+                displayType();
+                std::cin >> tipe;
+                if (tipe != 1 && tipe != 2) {
+                    tipe_str = "Tanda tangan";
+                }
+                
+                switch (tipe) {
+                    case 1:
+                        tipe_str = "Tanda tangan";
+                        break;
+                    case 2:
+                        tipe_str = "Segel";
+                        break;
+                    
+                }
+                displayJenis(tipe_str);
+                std::cin >> jenis;
+                if (jenis != 1 && jenis != 2 && jenis != 3 && jenis != 4 && jenis != 5) {
+                    sgn(0, filename.c_str(), dummy.c_str(), dummy.c_str(), 1, fdummy, fdummy, fdummy, fdummy, (tipe-1));
+                    std::cout << "Proses " << tipe_str << "Selesai\nOutput disimpan dengan nama 'output.pdf'";
+                }
+                switch (jenis) {
+                    case 1:
+                        sgn(0, filename.c_str(), dummy.c_str(), dummy.c_str(), 1, fdummy, fdummy, fdummy, fdummy, (tipe-1));
+                        std::cout << "Proses " << tipe_str << "Selesai\nOutput disimpan dengan nama 'output.pdf'";
+                        break;
+                    case 2: {
+                        std::cout << "Masukkan path gambar (e.g /path/to/image.jpg): ";
+                        std::cin >> imageorurl;
+                        std::cout << "Gambar akan di tempel pada halaman 1\n";
+                        std::cout << "Masukkan posisi x,y,width,height tanpa spasi (e.g 100,100,200,50): ";
+                        std::cin >> posisi;
+                        // Use a stringstream to parse the values
+                        std::stringstream ss1(posisi);
+                        // Parse x, y as integers, and width, height as floats
+                        char comma1;  // To skip commas
+                        ss1 >> x >> comma1 >> y >> comma1 >> width >> comma1 >> height;
+                        sgn(1, filename.c_str(), dummy.c_str(), imageorurl.c_str(), 1, x, y, width, height, (tipe-1));
+                        std::cout << "Proses " << tipe_str << "Selesai\nOutput disimpan dengan nama 'output.pdf'";
+                        break;
+                    }
+                    case 3: {
+                        std::cout << "Masukkan path url (e.g https://google.com): ";
+                        std::cin >> imageorurl;
+                        std::cout << "QRCode akan di tempel pada halaman 1\n";
+                        std::cout << "Masukkan posisi x,y,width,height tanpa spasi (e.g 100,100,200,50): ";
+                        std::cin >> posisi;
+                        // Use a stringstream to parse the values
+                        std::stringstream ss2(posisi);
+                        // Parse x, y as integers, and width, height as floats
+                        char comma2;  // To skip commas
+                        ss2 >> x >> comma2 >> y >> comma2 >> width >> comma2 >> height;
+                        sgn(2, filename.c_str(), dummy.c_str(), imageorurl.c_str(), 1, x, y, width, height, (tipe-1));
+                        std::cout << "Proses " << tipe_str << "Selesai\nOutput disimpan dengan nama 'output.pdf'";
+                        break;
+                    }
+                    case 4:
+                        std::cout << "Masukkan path gambar (e.g /path/to/image.jpg): ";
+                        std::cin >> imageorurl;
+                        std::cout << "Note: Karakter harus ada di halaman 1\nMasukkan karakter untuk penempatan Gambar (e.g #): ";
+                        std::cin >> karakter;
+                        sgn(3, filename.c_str(), karakter.c_str(), imageorurl.c_str(), 1, fdummy, fdummy, fdummy, fdummy, (tipe-1));
+                        std::cout << "Proses " << tipe_str << "Selesai\nOutput disimpan dengan nama 'output.pdf'";
+                        break;
+                    case 5:
+                        std::cout << "Masukkan path url (e.g https://google.com): ";
+                        std::cin >> imageorurl;
+                        std::cout << "Note: Karakter harus ada di halaman 1\nMasukkan karakter untuk penempatan QRCode (e.g #): ";
+                        std::cin >> karakter;
+                        sgn(4, filename.c_str(), karakter.c_str(), imageorurl.c_str(), 1, fdummy, fdummy, fdummy, fdummy, (tipe-1));
+                        std::cout << "Proses " << tipe_str << "Selesai\nOutput disimpan dengan nama 'output.pdf'";
+                        break;
+                }
+
+                return 0;
             } else {
                 std::cout << "File not exist" << std::endl;
                 return 1;  // Return error code if the file exists
@@ -242,6 +352,4 @@ int main(int argc, char* argv[]) {
         std::cout << "Usage: besign <command> <filename.pdf>" << std::endl;
         return 1;  // Return error code if the file exists
     }
-
-    return 0;
 }

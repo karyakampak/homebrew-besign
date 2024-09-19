@@ -471,7 +471,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict
     return myMap;
 }
 
-std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict_image_to_char(std::vector<unsigned char> pdf_content, const char* input_image_path_string, int page, float width, float height, std::vector<std::string> object_page_ref, std::unordered_map<std::string, std::string> read_pdf, std::unordered_map<std::string, std::string> check_sign) {
+std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict_image_to_char(std::vector<unsigned char> pdf_content, const char* character, const char* input_image_path_string, int page, float width, float height, std::vector<std::string> object_page_ref, std::unordered_map<std::string, std::string> read_pdf, std::unordered_map<std::string, std::string> check_sign) {
 
     Addons adns;
 
@@ -646,7 +646,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict
     return myMap;
 }
 
-std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict_qr_to_char(std::vector<unsigned char> pdf_content, const char* url, int page, float width, float height, std::vector<std::string> object_page_ref, std::unordered_map<std::string, std::string> read_pdf, std::unordered_map<std::string, std::string> check_sign) {
+std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict_qr_to_char(std::vector<unsigned char> pdf_content, const char* character, const char* url, int page, float width, float height, std::vector<std::string> object_page_ref, std::unordered_map<std::string, std::string> read_pdf, std::unordered_map<std::string, std::string> check_sign) {
 
     Addons adns;
 

@@ -95,17 +95,21 @@ std::string createDetachedCMS(const std::string& data, EVP_PKEY* pkey, X509* cer
 }
 
 std::string CMS::generateCMS_file(const std::string& pkcs12Path, const std::string& password, const std::string& data) {
+    std::cout << "Joossss 2.2.0" << std::endl;
     EVP_PKEY* pkey = nullptr;
     X509* cert = nullptr;
     STACK_OF(X509)* ca = nullptr;
 
+    std::cout << "Joossss 2.2.1" << std::endl;
     if (!loadPKCS12(pkcs12Path, password, pkey, cert, ca)) {
         std::cerr << "Failed to load PKCS#12 file" << std::endl;
         return "";
     }
 
+    std::cout << "Joossss 2.2.2" << std::endl;
     std::string signature = createDetachedCMS(data, pkey, cert, ca);
 
+    std::cout << "Joossss 2.2.3" << std::endl;
     EVP_PKEY_free(pkey);
     X509_free(cert);
     sk_X509_pop_free(ca, X509_free);

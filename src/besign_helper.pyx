@@ -54,7 +54,7 @@ def convert_pdf_to_version_1_3(pdf_stream):
     os.remove(output_pdf_path)
 
     # Return the PDF 1.3 data as bytes
-    return pdf_1_3_bytes
+    return pdf_1_3_bytes.getvalue() 
 
 def decrypt_pdf_to_bytes(pdf_data, password):
     # Convert raw PDF data (bytes) to a BytesIO object
@@ -90,7 +90,7 @@ def decrypt_pdf_to_bytes(pdf_data, password):
 
 
             # Return the BytesIO object containing the decrypted PDF data
-            return pdf_1_3.getvalue()  # Return the bytes
+            return pdf_1_3 # Return the bytes
         else:
             print("Incorrect password. Could not decrypt the PDF.")
             return None

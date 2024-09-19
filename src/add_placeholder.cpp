@@ -17,10 +17,10 @@ AddPlaceHolder::AddPlaceHolder() {
     // Initialize private member variables or perform any necessary setup
 }
 
-std::unordered_map<std::string, std::string> AddPlaceHolder::addPlaceholder(int type, const char* pdf_path, const char* image_path, int page, int visibility, float x, float y, float width, float height, int isSeal) {
+std::unordered_map<std::string, std::string> AddPlaceHolder::addPlaceholder(int type, const char* pdf_path, int isProtected, const char* character, const char* imageorurl, int page, float x, float y, float width, float height, int isSeal) {
 
     OpenFile opf;
-    std::vector<uint8_t> pdfContent = opf.open(pdf_path);
+    std::vector<uint8_t> pdfContent = opf.open(pdf_path, isProtected);
 
     GetPdfComponent rdpdf;
     std::unordered_map<std::string, std::string> pdf_component = rdpdf.getPdfComponent(pdfContent);
@@ -53,25 +53,25 @@ std::unordered_map<std::string, std::string> AddPlaceHolder::addPlaceholder(int 
     std::unordered_map<std::string, std::vector<uint8_t> > signature_object_added;
     if(isSeal){
         if(type == 1){
-            signature_object_added = adseal.add_sealdict_with_image(pdfContent, image_path, page, x, y, width, height, page_reference, pdf_component, signature_reference);
+            signature_object_added = adseal.add_sealdict_with_image(pdfContent, imageorurl, page, x, y, width, height, page_reference, pdf_component, signature_reference);
         } else if (type == 2) {
-            signature_object_added = adseal.add_sealdict_with_qr(pdfContent, image_path, page, x, y, width, height, page_reference, pdf_component, signature_reference);
+            signature_object_added = adseal.add_sealdict_with_qr(pdfContent, imageorurl, page, x, y, width, height, page_reference, pdf_component, signature_reference);
         }else if (type == 3) {
-            signature_object_added = adseal.add_sealdict_image_to_char(pdfContent, image_path, page, width, height, page_reference, pdf_component, signature_reference);
+            signature_object_added = adseal.add_sealdict_image_to_char(pdfContent, character, imageorurl, page, width, height, page_reference, pdf_component, signature_reference);
         }else if (type == 4) {
-            signature_object_added = adseal.add_sealdict_qr_to_char(pdfContent, image_path, page, width, height, page_reference, pdf_component, signature_reference);
+            signature_object_added = adseal.add_sealdict_qr_to_char(pdfContent, character, imageorurl, page, width, height, page_reference, pdf_component, signature_reference);
         } else {
             signature_object_added = adseal.add_sealdict(pdfContent, page, page_reference, pdf_component, signature_reference);
         }
     } else{
         if(type == 1){
-            signature_object_added = adsig.add_signaturedict_with_image(pdfContent, image_path, page, x, y, width, height, page_reference, pdf_component, signature_reference);
+            signature_object_added = adsig.add_signaturedict_with_image(pdfContent, imageorurl, page, x, y, width, height, page_reference, pdf_component, signature_reference);
         } else if (type == 2) {
-            signature_object_added = adsig.add_signaturedict_with_qr(pdfContent, image_path, page, x, y, width, height, page_reference, pdf_component, signature_reference);
+            signature_object_added = adsig.add_signaturedict_with_qr(pdfContent, imageorurl, page, x, y, width, height, page_reference, pdf_component, signature_reference);
         }else if (type == 3) {
-            signature_object_added = adsig.add_signaturedict_image_to_char(pdfContent, image_path, page, width, height, page_reference, pdf_component, signature_reference);
+            signature_object_added = adsig.add_signaturedict_image_to_char(pdfContent, character, imageorurl, page, width, height, page_reference, pdf_component, signature_reference);
         }else if (type == 4) {
-            signature_object_added = adsig.add_signaturedict_qr_to_char(pdfContent, image_path, page, width, height, page_reference, pdf_component, signature_reference);
+            signature_object_added = adsig.add_signaturedict_qr_to_char(pdfContent, character, imageorurl, page, width, height, page_reference, pdf_component, signature_reference);
         } else {
             signature_object_added = adsig.add_signaturedict(pdfContent, page, page_reference, pdf_component, signature_reference);
         }

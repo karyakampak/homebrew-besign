@@ -88,7 +88,6 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
 
     std::vector<unsigned char> page_obj_vec(page_obj.begin(), page_obj.end());
 
-
     size_t rootIndex = adns.extract_integer(read_pdf.at("rootRef"));
     size_t pageIndex = adns.extract_integer(page_dict.substr(0, 10));
 
@@ -469,7 +468,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
     return myMap;
 }
 
-std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_signaturedict_image_to_char(std::vector<unsigned char> pdf_content, const char* input_image_path_string, int page, float width, float height, std::vector<std::string> object_page_ref, std::unordered_map<std::string, std::string> read_pdf, std::unordered_map<std::string, std::string> check_sign) {
+std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_signaturedict_image_to_char(std::vector<unsigned char> pdf_content, const char* character, const char* input_image_path_string, int page, float width, float height, std::vector<std::string> object_page_ref, std::unordered_map<std::string, std::string> read_pdf, std::unordered_map<std::string, std::string> check_sign) {
 
     Addons adns;
 
@@ -519,7 +518,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
 
 
         Visualization vzsl;
-        std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), "#");
+        std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), character);
         std::vector<uint8_t> visualization = vzsl.get_image(image_data);
         std::string visualization_string(visualization.begin(), visualization.end());
         // std::cout << visualization_string << std::endl;
@@ -644,7 +643,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
     return myMap;
 }
 
-std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_signaturedict_qr_to_char(std::vector<unsigned char> pdf_content, const char* url, int page, float width, float height, std::vector<std::string> object_page_ref, std::unordered_map<std::string, std::string> read_pdf, std::unordered_map<std::string, std::string> check_sign) {
+std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_signaturedict_qr_to_char(std::vector<unsigned char> pdf_content, const char* character, const char* url, int page, float width, float height, std::vector<std::string> object_page_ref, std::unordered_map<std::string, std::string> read_pdf, std::unordered_map<std::string, std::string> check_sign) {
 
     Addons adns;
 
@@ -704,7 +703,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
         Visualization vzsl;
         std::vector<uint8_t> visualization = vzsl.get_image(image_data);
         std::string visualization_string(visualization.begin(), visualization.end());
-        std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), "#");
+        std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), character);
 
 
         // Jika menggunnakan tanda #

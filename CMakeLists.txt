@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.10)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -109,6 +109,13 @@ include_directories(${CURL_INCLUDE_DIRS})
 
 find_package(nlohmann_json 3.2.0 REQUIRED)
 include_directories(${nlohmann_json_INCLUDE_DIRS})
+
+
+# # Specify the path to the cmake modules if not in the default directory
+# set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+# # Find MuPDF
+# find_package(MuPDF REQUIRED)
+# include_directories(${MUPDF_INCLUDE_DIRS})
 
 # Try to find the UUID library
 find_library(UUID_LIBRARY NAMES uuid)
