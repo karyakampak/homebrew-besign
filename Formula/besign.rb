@@ -27,9 +27,10 @@ class Besign < Formula
     # Ensure pymupdf (fitz) is correctly installed
     system "#{venv_path}/bin/python3", "-c", "import fitz"
 
+    # Set environment variables to use the virtual environment
+    site_packages = "#{venv_path}/lib/python#{Formula["python@3"].version.major_minor}/site-packages"
+
     cd "build" do
-      # Set environment variables to use the virtual environment
-      site_packages = "#{venv_path}/lib/python#{Formula["python@3"].version.major_minor}/site-packages"
       ENV["PYTHONPATH"] = site_packages
       ENV.prepend_path "PATH", "#{venv_path}/bin"
 
