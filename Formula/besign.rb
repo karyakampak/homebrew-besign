@@ -29,11 +29,11 @@ class Besign < Formula
 
     # Compile Cython files, if necessary
     cd "src" do
-      system "#{venv_path}/bin/python3", "setup.py", "build_ext", "--inplace"
+      system "#{venv_path}/bin/python3", "src/setup.py", "build_ext", "--inplace"
     end
 
     # Ensure 'besign_helper' is installed correctly
-    system "#{venv_path}/bin/python3", "setup.py", "install"
+    system "#{venv_path}/bin/python3", "src/setup.py", "install"
 
     # Set environment variables to use the virtual environment
     site_packages = "#{venv_path}/lib/python#{Formula["python@3"].version.major_minor}/site-packages"
