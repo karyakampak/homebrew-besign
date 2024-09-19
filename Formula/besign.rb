@@ -29,7 +29,7 @@ class Besign < Formula
       ENV["PYTHONPATH"] = "#{venv_path}/lib/python#{Formula["python@3"].version.major_minor}/site-packages"
       ENV.prepend_path "PATH", "#{venv_path}/bin"
 
-      system "cmake", "..", *std_cmake_args
+      system "cmake", "..",  "-DPYTHON_EXECUTABLE=#{venv_path}/bin/python3", *std_cmake_args
       system "make"
       system "make", "install"
     end
