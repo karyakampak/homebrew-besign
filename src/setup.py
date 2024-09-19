@@ -12,6 +12,11 @@ setup(
         # language="c++",  # This tells Cython to generate C++ code
     ),
     include_dirs=[numpy.get_include()],  # Remove this line if you are not using numpy
+    install_requires=[
+        'fitz',  # PyMuPDF
+        'qrcode[pil]',  # QRCode with Pillow support
+        'Pillow',  # PIL
+    ],
     script_args=['build_ext', '--inplace'],
     options={'build_ext': {'build_lib': build_dir}}
 )

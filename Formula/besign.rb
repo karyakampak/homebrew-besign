@@ -1,8 +1,8 @@
 class Besign < Formula
   desc "Program for make signature object on pdf"  
   homepage "https://github.com/karyakampak/homebrew-besign"
-  url "https://github.com/karyakampak/homebrew-besign/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "093038b3e1191d73d5fdf5a85363f774ee714e07a16a6680af88f6e69fca3667"
+  url "https://github.com/karyakampak/homebrew-besign/archive/refs/tags/v1.0.4.tar.gz"
+  sha256 "50e6264287c7512b91176aa240dcc637718fb6b99f7977bc993fd7bc1e831923"
   license "MIT"
 
   depends_on "cmake" => :build
@@ -22,36 +22,17 @@ class Besign < Formula
 
     # Create and activate a virtual environment
     system "#{python3}", "-m", "venv", venv_path
-    system "#{venv_path}/bin/pip", "install", "setuptools", "Cython", "numpy", "pymupdf", "qrcode[pil]", "pillow"
-
-    # Ensure pymupdf (fitz) is correctly installed
-    system "#{venv_path}/bin/python3", "-c", "import fitz"
-
-
-    # Navigate to the sec/ directory to compile and install besign_helper.pyx
-    cd "sec" do
-      system "#{venv_path}/bin/python3", "setup.py", "build_ext", "--inplace"
-      system "#{venv_path}/bin/python3", "setup.py", "install"
-    end
-
-    # Ensure 'besign_helper' is installed correctly
-    system "#{venv_path}/bin/python3", "setup.py", "install"
-
-    # Set environment variables to use the virtual environment
-    site_packages = "#{venv_path}/lib/python#{Formula["python@3"].version.major_minor}/site-packages"
+    system "#{venv_path}/bin/pip", "install", "--upgrade", "setuptools", "wheel", "Cython", "numpy", "pymupdf", "qrcode[pil]", "pillow"
 
     cd "build" do
-      ENV["PYTHONPATH"] = site_packages
+      # Set environment variables to use the virtual environment
+      ENV["PYTHONPATH"] = "#{venv_path}/lib/python#{Formula["python@3"].version.major_minor}/site-packages"
       ENV.prepend_path "PATH", "#{venv_path}/bin"
 
-      system "cmake", "..",  "-DPYTHON_EXECUTABLE=#{venv_path}/bin/python3", *std_cmake_args
+      system "cmake", "..", *std_cmake_args
       system "make"
       system "make", "install"
     end
-
-    # Ensure PYTHONPATH is set correctly when besign runs
-    bin.env_script_all_files(libexec/"bin", :PYTHONPATH => site_packages)
-
   end
 
   test do
