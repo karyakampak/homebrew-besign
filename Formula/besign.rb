@@ -36,6 +36,10 @@ class Besign < Formula
       system "make"
       system "make", "install"
     end
+
+    # Ensure PYTHONPATH is set correctly when besign runs
+    bin.env_script_all_files(libexec/"bin", :PYTHONPATH => site_packages)
+    
   end
 
   test do
