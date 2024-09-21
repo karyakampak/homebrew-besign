@@ -94,7 +94,6 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 include_directories(${Python3_INCLUDE_DIRS})
 
 
-
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -110,6 +109,8 @@ include_directories(${CURL_INCLUDE_DIRS})
 find_package(nlohmann_json 3.2.0 REQUIRED)
 include_directories(${nlohmann_json_INCLUDE_DIRS})
 
+find_package(ZLIB REQUIRED)
+include_directories(${ZLIB_INCLUDE_DIRS})
 
 # # Specify the path to the cmake modules if not in the default directory
 # set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -119,12 +120,6 @@ include_directories(${nlohmann_json_INCLUDE_DIRS})
 
 # Try to find the UUID library
 find_library(UUID_LIBRARY NAMES uuid)
-
-
-target_link_libraries(besign_executable ${UUID_LIBRARY} nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS} ${Python3_LIBRARIES})
-target_link_libraries(besign_library ${UUID_LIBRARY} nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS} ${Python3_LIBRARIES})
-target_link_libraries(besign_object ${UUID_LIBRARY} nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS} ${Python3_LIBRARIES})
-
 
 # Define custom build directory
 set(CUSTOM_CYTHON_BUILD_DIR "${CMAKE_BINARY_DIR}/cython_build")
@@ -137,7 +132,7 @@ add_custom_target(
     install_python_deps ALL
     COMMAND ${Python3_EXECUTABLE} -m venv ${VENV_PATH}
     COMMAND ${VENV_PATH}/bin/pip install --upgrade pip
-    COMMAND ${VENV_PATH}/bin/pip install Cython pymupdf numpy qrcode[pil] pillow
+    COMMAND ${VENV_PATH}/bin/pip install setuptools Cython pymupdf numpy pikepdf
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Setting up Python virtual environment and installing dependencies"
 )
@@ -151,9 +146,6 @@ add_custom_target(
     DEPENDS install_python_deps
 )
 
-# Set the environment variable PYTHONPATH for correct module import
-set(ENV{PYTHONPATH} "${VENV_PATH}/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages")
-
 # Build the project using CMake
 add_custom_target(
     install_besign
@@ -164,6 +156,15 @@ add_custom_target(
 
 # Ensure that the cython_module is built before running cmake build
 add_dependencies(install_besign cython_module)
+
+set(PYTHON_EXECUTABLE ${VENV_PATH}/bin/python)
+set(ENV{PYTHONPATH} "${VENV_PATH}/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages")
+
+
+target_link_libraries(besign_executable ${UUID_LIBRARY} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS} ${Python3_LIBRARIES})
+target_link_libraries(besign_library ${UUID_LIBRARY} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS} ${Python3_LIBRARIES})
+target_link_libraries(besign_object ${UUID_LIBRARY} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS} ${Python3_LIBRARIES})
+
 
 # Determine platform-specific include and lib directories
 if(APPLE)
@@ -234,6 +235,11 @@ set_target_properties(besign_object PROPERTIES
 set_target_properties(besign_executable PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
+
+# Ensure Cython module is built before C++ targets
+add_dependencies(besign_executable cython_module)
+add_dependencies(besign_library cython_module)
+add_dependencies(besign_object cython_module)
 
 set_target_properties(besign_library besign_object besign_executable PROPERTIES OUTPUT_NAME besign)
 

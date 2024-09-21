@@ -14,7 +14,10 @@
 #include <sstream>
 #include <iomanip>
 #include <fstream>
-#include <zlib.h>
+#include <opencv2/opencv.hpp>   // For image manipulation (OpenCV)
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <zlib.h> 
 
 AddSealDict::AddSealDict() {
     // Initialize private member variables or perform any necessary setup
@@ -180,7 +183,9 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict
 
 
         Visualization vzsl;
-        std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        // std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        cv::Mat img = cv::imdecode(image_data, cv::IMREAD_UNCHANGED);
+        std::vector<uint8_t> visualization = adns.process_image(img);
         std::string visualization_string(visualization.begin(), visualization.end());
 
         float rectWidth;
@@ -353,7 +358,9 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict
         stbi_load_from_memory(image_char.data(), image_char.size(), &widthImage, &heightImage, &channels, 0);
 
         Visualization vzsl;
-        std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        // std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        cv::Mat img = cv::imdecode(image_data, cv::IMREAD_UNCHANGED);
+        std::vector<uint8_t> visualization = adns.process_image(img);
         std::string visualization_string(visualization.begin(), visualization.end());
 
         float rectWidth;
@@ -521,8 +528,10 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict
 
 
         Visualization vzsl;
-        std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), "#");
-        std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), character);
+        // std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        cv::Mat img = cv::imdecode(image_data, cv::IMREAD_UNCHANGED);
+        std::vector<uint8_t> visualization = adns.process_image(img);
         std::string visualization_string(visualization.begin(), visualization.end());
         // std::cout << visualization_string << std::endl;
 
@@ -704,8 +713,10 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict
 
 
         Visualization vzsl;
-        std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), "#");
-        std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), character);
+        // std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        cv::Mat img = cv::imdecode(image_data, cv::IMREAD_UNCHANGED);
+        std::vector<uint8_t> visualization = adns.process_image(img);
         std::string visualization_string(visualization.begin(), visualization.end());
         // std::cout << visualization_string << std::endl;
 

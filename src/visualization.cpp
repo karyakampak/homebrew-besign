@@ -82,12 +82,15 @@ std::vector<uint8_t> process_image(std::vector<unsigned char> image_data) {
     }
 
     Py_Finalize();
+    
+    return {};
 }
 
 std::vector<double> find_char_position(std::vector<unsigned char> pdf_data, int page_num, const char* target_char) {
     std::vector<double> result;
     // Initialize the Python interpreter
     Py_Initialize();
+
     
     // Import the Cython module
     PyObject* pName = PyUnicode_DecodeFSDefault("besign_helper");
@@ -150,6 +153,8 @@ std::vector<double> find_char_position(std::vector<unsigned char> pdf_data, int 
     
     // Finalize the Python interpreter
     Py_Finalize();
+
+    return result;
 }
 
 std::vector<double> Visualization::get_position(std::vector<unsigned char> pdf_data, int page_num, const char* target_char){

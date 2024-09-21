@@ -3,7 +3,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <mupdf/fitz.h>
 
 OpenFile::OpenFile() {
     // Initialize private member variables or perform any necessary setup
@@ -25,10 +24,10 @@ std::vector<uint8_t> get_decrypted_pdf(const std::vector<uint8_t>& pdf_data, con
     }
 
     // Get the function from the module
-    PyObject* pFunc = PyObject_GetAttrString(pModule, "decrypt_pdf_to_bytes");
+    PyObject* pFunc = PyObject_GetAttrString(pModule, "decrypt_pdf_from_bytes");
     if (pFunc == nullptr || !PyCallable_Check(pFunc)) {
         PyErr_Print();
-        std::cerr << "Failed to find function 'decrypt_pdf_to_bytes'.\n";
+        std::cerr << "Failed to find function 'decrypt_pdf_from_bytes'.\n";
         Py_XDECREF(pFunc);
         Py_XDECREF(pModule);
         Py_Finalize();

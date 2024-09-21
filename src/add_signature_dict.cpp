@@ -15,6 +15,10 @@
 #include <sstream>
 #include <iomanip>
 #include <fstream>
+#include <opencv2/opencv.hpp>   // For image manipulation (OpenCV)
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <zlib.h> 
 
 AddSignatureDict::AddSignatureDict() {
     // Initialize private member variables or perform any necessary setup
@@ -177,7 +181,9 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
 
 
         Visualization vzsl;
-        std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        // std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        cv::Mat img = cv::imdecode(image_data, cv::IMREAD_UNCHANGED);
+        std::vector<uint8_t> visualization = adns.process_image(img);
         std::string visualization_string(visualization.begin(), visualization.end());
 
         float rectWidth;
@@ -336,6 +342,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
     std::string text = url;
     std::string filename = std::to_string(milliseconds)+".jpg";
     std::vector<unsigned char> image_char = adns.saveQRCodeAsJPG(text, filename);
+    // std::vector<unsigned char> image_char = adns.saveQRCodeAsJPG_V2(text, "/Users/pusopskamsinas/Documents/Pribadi/Cpp/logo.png", filename);
     // std::vector<unsigned char> image_char = adns.saveQRCodeAsJPG_2(text);
 
     std::ifstream image_file(filename.c_str(), std::ios::binary);
@@ -350,7 +357,9 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
         stbi_load_from_memory(image_char.data(), image_char.size(), &widthImage, &heightImage, &channels, 0);
 
         Visualization vzsl;
-        std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        // std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        cv::Mat img = cv::imdecode(image_data, cv::IMREAD_UNCHANGED);
+        std::vector<uint8_t> visualization = adns.process_image(img);
         std::string visualization_string(visualization.begin(), visualization.end());
 
         float rectWidth;
@@ -519,7 +528,9 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
 
         Visualization vzsl;
         std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), character);
-        std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        // std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        cv::Mat img = cv::imdecode(image_data, cv::IMREAD_UNCHANGED);
+        std::vector<uint8_t> visualization = adns.process_image(img);
         std::string visualization_string(visualization.begin(), visualization.end());
         // std::cout << visualization_string << std::endl;
 
@@ -701,7 +712,9 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
 
 
         Visualization vzsl;
-        std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        // std::vector<uint8_t> visualization = vzsl.get_image(image_data);
+        cv::Mat img = cv::imdecode(image_data, cv::IMREAD_UNCHANGED);
+        std::vector<uint8_t> visualization = adns.process_image(img);
         std::string visualization_string(visualization.begin(), visualization.end());
         std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), character);
 

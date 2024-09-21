@@ -13,9 +13,7 @@ setup(
     ),
     include_dirs=[numpy.get_include()],  # Remove this line if you are not using numpy
     install_requires=[
-        'fitz',  # PyMuPDF
-        'qrcode[pil]',  # QRCode with Pillow support
-        'Pillow',  # PIL
+        'fitz'  # PyMuPDF
     ],
     script_args=['build_ext', '--inplace'],
     options={'build_ext': {'build_lib': build_dir}}

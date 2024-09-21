@@ -2,11 +2,9 @@
 
 require_once 'class.php';
 
-$type = 4;
-// $pdf_path = dirname(dirname(__DIR__)) . "/input/example.pdf";
-$pdf_path = dirname(dirname(__DIR__)) . "/input/example_with_char.pdf";
-// $pdf_path = dirname(dirname(__DIR__)) . "/input/example_protected.pdf";
-$isProtected = 0;
+$type = 1;
+$pdf_path = dirname(dirname(__DIR__)) . "/input/example_protected.pdf";
+$isProtected = 1;
 $image_path = dirname(dirname(__DIR__)) . "/input/image.png";
 $output_path = dirname(dirname(__DIR__)) . "/output/output.pdf";
 $p12Path = dirname(dirname(__DIR__)) . "/input/usertesting.p12";

@@ -15,6 +15,11 @@
 #include <openssl/sha.h>
 #include <openssl/asn1.h>
 #include <openssl/cms.h>
+#include <opencv2/opencv.hpp>
+#include <qrencode.h>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <zlib.h> 
 
 // Class declaration
 class Addons {
@@ -49,11 +54,13 @@ public:
     std::string vector_size_t_to_string(const std::vector<size_t>& input);
     std::vector<unsigned char> saveQRCodeAsJPG(const std::string &text, const std::string &filename);
     std::vector<unsigned char> saveQRCodeAsJPG_2(const std::string &text);
+    std::vector<unsigned char> saveQRCodeAsJPG_V2(const std::string& text, const std::string& image_path, const std::string& filename);
     std::string get_page(const std::vector<uint8_t>& pdf_content, const std::string& object_page_ref);
     bool containsAnnots(const std::vector<uint8_t>& pdfData);
     std::unordered_map<std::string, std::string> checkAnnotOnPage(std::string page_dict);
     std::string get_catalog(const std::vector<uint8_t>& pdf_content, const std::unordered_map<std::string, std::string>& read_pdf);
     size_t extract_integer(const std::string& input);
+    std::vector<unsigned char> process_image(cv::Mat img);
 
 
 

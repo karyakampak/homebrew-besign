@@ -1,5 +1,6 @@
 #ifndef CMS_H
 #define CMS_H
+#include <vector>
 #include <iostream>
 #include <cstdint>
 

@@ -23,9 +23,11 @@
 #include <openssl/pkcs12.h>
 #include <iomanip>
 #include <iomanip>
-#include <zlib.h>
 #include <opencv2/opencv.hpp>
 #include <qrencode.h>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <zlib.h>
 
 #define PIXEL_SIZE 10  // Scale of each QR code pixel block
 
@@ -734,6 +736,153 @@ std::vector<unsigned char> Addons::saveQRCodeAsJPG(const std::string &text, cons
     return buffer;
 }
 
+std::vector<unsigned char> Addons::saveQRCodeAsJPG_V2(const std::string& text, const std::string& image_path, const std::string& filename) {
+    // Generate the main QR code
+    QRcode* qr = QRcode_encodeString(text.c_str(), 0, QR_ECLEVEL_H, QR_MODE_8, 1);
+    if (!qr) {
+        std::cerr << "Failed to generate QR code." << std::endl;
+        return {};
+    }
+
+    // Create an OpenCV matrix for the main QR code
+    int qr_size = qr->width * PIXEL_SIZE;
+    cv::Mat qr_image(qr_size, qr_size, CV_8UC1, cv::Scalar(255)); // White background
+
+    // Draw the QR code matrix onto the image
+    int scale = qr_size / qr->width;
+    for (int y = 0; y < qr->width; y++) {
+        for (int x = 0; x < qr->width; x++) {
+            cv::Rect rect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+            if (qr->data[y * qr->width + x] & 1) {
+                cv::rectangle(qr_image, rect, cv::Scalar(0, 0, 0), cv::FILLED);  // Black for QR code modules
+            } else {
+                cv::rectangle(qr_image, rect, cv::Scalar(255, 255, 255), cv::FILLED);  // White background
+            }
+        }
+    }
+
+    // Load the image to be placed on top of the QR code
+    cv::Mat overlay_image = cv::imread(image_path, cv::IMREAD_UNCHANGED);
+    if (overlay_image.empty()) {
+        std::cerr << "Failed to load overlay image." << std::endl;
+        return {};
+    }
+
+    // Resize the overlay image to be smaller than the small QR code
+    // cv::resize(overlay_image, overlay_image, cv::Size(small_qr_size - 20, small_qr_size - 20)); // Make it smaller
+    cv::resize(overlay_image, overlay_image, cv::Size(qr_size/5, qr_size/5)); // Make it smaller
+
+    // Ensure the overlay has 3 channels (BGR)
+    if (overlay_image.channels() == 1) {
+        cv::cvtColor(overlay_image, overlay_image, cv::COLOR_GRAY2BGR);
+    } else if (overlay_image.channels() == 4) {
+        cv::cvtColor(overlay_image, overlay_image, cv::COLOR_BGRA2BGR);
+    }
+
+    // Create a white background for the overlay
+    cv::Mat overlay_background(overlay_image.rows, overlay_image.cols, CV_8UC3, cv::Scalar(255, 255, 255));
+
+    // Blend the overlay image onto the white background
+    cv::Mat blended_overlay;
+    cv::addWeighted(overlay_background, 1.0, overlay_image, 1.0, 0.0, blended_overlay);
+
+    // Calculate the position to place the blended overlay in the center
+    int center_x = (qr_size - blended_overlay.cols) / 2;
+    int center_y = (qr_size - blended_overlay.rows) / 2;
+
+    // Ensure the QR image has 3 channels for copying
+    if (qr_image.channels() == 1) {
+        cv::cvtColor(qr_image, qr_image, cv::COLOR_GRAY2BGR);
+    }
+
+    // Place the blended overlay on the QR code
+    blended_overlay.copyTo(qr_image(cv::Rect(center_x, center_y, blended_overlay.cols, blended_overlay.rows)));
+
+    // Generate a smaller QR code to place in the top left
+    QRcode* small_qr = QRcode_encodeString(text.c_str(), 0, QR_ECLEVEL_H, QR_MODE_8, 1);
+    if (!small_qr) {
+        std::cerr << "Failed to generate small QR code." << std::endl;
+        return {};
+    }
+
+    // Create an OpenCV matrix for the small QR code
+    cv::Mat small_qr_image((qr_size/3)+(qr_size/12), (qr_size/3)+(qr_size/12), CV_8UC1, cv::Scalar(255)); // White background
+
+    // Draw the small QR code matrix onto the image
+    scale = ((qr_size/3)+(qr_size/12)) / small_qr->width;
+    for (int y = 0; y < qr->width; y++) {
+        for (int x = 0; x < qr->width; x++) {
+            cv::Rect rect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+            if (qr->data[y * qr->width + x] & 1) {
+                cv::rectangle(small_qr_image, cv::Point(x * scale, y * scale), cv::Point((x + 1) * scale, (y + 1) * scale), cv::Scalar(0, 0, 0), cv::FILLED);  // Black for QR code modules
+            } else {
+                cv::rectangle(small_qr_image, cv::Point(x * scale, y * scale), cv::Point((x + 1) * scale, (y + 1) * scale), cv::Scalar(255, 255, 255), cv::FILLED);  // White background
+            }
+        }
+    }
+
+    // Ensure the small QR image has 3 channels
+    if (small_qr_image.channels() == 1) {
+        cv::cvtColor(small_qr_image, small_qr_image, cv::COLOR_GRAY2BGR);
+    }
+
+    // Place the small QR code in the top left corner
+    small_qr_image.copyTo(qr_image(cv::Rect(0, 0, small_qr_image.cols, small_qr_image.rows)));
+
+    // Step 4: Load the logo image and resize it
+    int logo_size = (qr_size/5);
+    cv::Mat logo = cv::imread(image_path, cv::IMREAD_UNCHANGED);
+    if (logo.empty()) {
+        std::cerr << "Failed to load logo image" << std::endl;
+        QRcode_free(qr);
+        return {};
+    }
+    cv::resize(logo, logo, cv::Size(logo_size, logo_size));
+
+    // If the logo has an alpha channel (transparency), blend it with the QR code
+    if (logo.channels() == 4) {
+        for (int y = 0; y < logo_size; ++y) {
+            for (int x = 0; x < logo_size; ++x) {
+                cv::Vec4b pixel = logo.at<cv::Vec4b>(y, x);
+                if (pixel[3] > 0) {  // Check for transparency (alpha > 0)
+                    // Blend logo pixel with QR code pixel
+                    cv::Vec3b& qr_pixel = qr_image.at<cv::Vec3b>(center_y + y, center_x + x);
+                    qr_pixel[0] = (qr_pixel[0] * (255 - pixel[3]) + pixel[0] * pixel[3]) / 255;
+                    qr_pixel[1] = (qr_pixel[1] * (255 - pixel[3]) + pixel[1] * pixel[3]) / 255;
+                    qr_pixel[2] = (qr_pixel[2] * (255 - pixel[3]) + pixel[2] * pixel[3]) / 255;
+                }
+            }
+        }
+    } else {
+        // If no transparency, just place the logo
+        logo.copyTo(qr_image(cv::Rect(center_x, center_y, logo_size, logo_size)));
+    }
+
+    // Save the final image to a file
+
+    // Save the image as JPG
+    if (cv::imwrite(filename, qr_image)) {
+        // std::cout << "QR code saved as " << filename << std::endl;
+    } else {
+        std::cerr << "Failed to save the QR code as JPG" << std::endl;
+    }
+
+    // Encode the image to a vector in memory (JPG format)
+    std::vector<unsigned char> buffer;
+    std::vector<int> compression_params = {cv::IMWRITE_JPEG_QUALITY, 90};  // JPEG quality (90%)
+    
+    if (!cv::imencode(".jpg", qr_image, buffer, compression_params)) {
+        std::cerr << "Failed to encode the QR code as JPG" << std::endl;
+        return {};
+    }
+
+    // Free the QR codes
+    QRcode_free(qr);
+    QRcode_free(small_qr);
+
+    return buffer;
+}
+
 std::vector<unsigned char> Addons::saveQRCodeAsJPG_2(const std::string &text) {
     // Create the QR code
     QRcode *qr = QRcode_encodeString(text.c_str(), 0, QR_ECLEVEL_H, QR_MODE_8, 1);
@@ -905,4 +1054,47 @@ size_t Addons::extract_integer(const std::string& input) {
 
     // Convert the substring containing the integer part to size_t
     return std::stoul(input.substr(start_pos, pos - start_pos));
+}
+
+
+// Function to process the image
+std::vector<unsigned char> Addons::process_image(cv::Mat img) {
+    // Check if image has transparency (alpha channel)
+    if (img.channels() == 4) {
+        // Split the RGBA channels
+        std::vector<cv::Mat> rgba_channels(4);
+        cv::split(img, rgba_channels);
+
+        // Extract the alpha channel
+        cv::Mat alpha_channel = rgba_channels[3];
+
+        // Create a new image with a white background (RGB only)
+        cv::Mat white_bg(img.size(), CV_8UC3, cv::Scalar(255, 255, 255));
+
+        // Convert the original RGBA image to RGB
+        cv::Mat img_rgb;
+        cv::cvtColor(img, img_rgb, cv::COLOR_BGRA2BGR);
+
+        // Use the alpha channel as a mask to composite the image over the white background
+        img_rgb.copyTo(white_bg, alpha_channel);
+
+        // Set the result to the composited image
+        img = white_bg;
+    } else if (img.channels() == 3) {
+        // Convert image to RGB (if it's not in RGB already)
+        cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
+    }
+
+    // Rotate the image by 180 degrees (optional)
+    // cv::rotate(img, img, cv::ROTATE_180);
+
+    // Encode the image to JPEG in memory
+    std::vector<unsigned char> img_encoded;
+    std::vector<int> jpeg_params = {cv::IMWRITE_JPEG_QUALITY, 90};  // JPEG quality
+    cv::imencode(".jpg", img, img_encoded, jpeg_params);
+
+    // Encode the JPEG data to Base64
+    // std::string encoded_string = base64_encode(img_encoded);
+
+    return reinterpret_cast<std::vector<uint8_t>&>(img_encoded);
 }
