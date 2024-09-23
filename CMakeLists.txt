@@ -96,8 +96,6 @@ install(FILES
     DESTINATION include
 )
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/cython_build/ DESTINATION lib FILES_MATCHING PATTERN "*")
-
 # Define platform-specific include and library directories
 if(APPLE)
     set(INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
