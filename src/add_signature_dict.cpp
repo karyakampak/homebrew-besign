@@ -71,9 +71,9 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
     if (check_sign.count("check") > 0 && check_sign.at("check") == "exist") {
         acroform_dict = "\n\n" + check_sign.at("acroform_last_start") + " " + std::to_string(max_index + 2) + " 0 R" + check_sign.at("acroform_last_end");
     }
-    // std::string object__start = "\n\n" + std::to_string(max_index + 4) + " 0 obj\n";
-    // std::string object__end = "\nendobj";
-    // std::string _dict = object__start + "undefined" + object__end;
+    std::string object__start = "\n\n" + std::to_string(max_index + 4) + " 0 obj\n";
+    std::string object__end = "\nendobj";
+    std::string _dict = object__start + "undefined" + object__end;
 
     std::string page_dict = adns.get_page(pdf_content, object_page_ref_annot);
     std::unordered_map<std::string, std::string> annots_on_page = adns.checkAnnotOnPage(page_dict);
@@ -238,9 +238,9 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
     if (check_sign.count("check") > 0 && check_sign.at("check") == "exist") {
         acroform_dict = "\n\n" + check_sign.at("acroform_last_start") + " " + std::to_string(max_index + 2) + " 0 R" + check_sign.at("acroform_last_end");
     }
-    // std::string object__start = "\n\n" + std::to_string(max_index + 4) + " 0 obj\n";
-    // std::string object__end = "\nendobj";
-    // std::string _dict = object__start + "undefined" + object__end;
+    std::string object__start = "\n\n" + std::to_string(max_index + 4) + " 0 obj\n";
+    std::string object__end = "\nendobj";
+    std::string _dict = object__start + "undefined" + object__end;
 
     std::string page_dict = adns.get_page(pdf_content, object_page_ref_annot);
     std::unordered_map<std::string, std::string> annots_on_page = adns.checkAnnotOnPage(page_dict);
@@ -415,9 +415,9 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
     if (check_sign.count("check") > 0 && check_sign.at("check") == "exist") {
         acroform_dict = "\n\n" + check_sign.at("acroform_last_start") + " " + std::to_string(max_index + 2) + " 0 R" + check_sign.at("acroform_last_end");
     }
-    // std::string object__start = "\n\n" + std::to_string(max_index + 4) + " 0 obj\n";
-    // std::string object__end = "\nendobj";
-    // std::string _dict = object__start + "undefined" + object__end;
+    std::string object__start = "\n\n" + std::to_string(max_index + 4) + " 0 obj\n";
+    std::string object__end = "\nendobj";
+    std::string _dict = object__start + "undefined" + object__end;
 
     std::string page_dict = adns.get_page(pdf_content, object_page_ref_annot);
     std::unordered_map<std::string, std::string> annots_on_page = adns.checkAnnotOnPage(page_dict);
@@ -593,9 +593,9 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
     if (check_sign.count("check") > 0 && check_sign.at("check") == "exist") {
         acroform_dict = "\n\n" + check_sign.at("acroform_last_start") + " " + std::to_string(max_index + 2) + " 0 R" + check_sign.at("acroform_last_end");
     }
-    // std::string object__start = "\n\n" + std::to_string(max_index + 4) + " 0 obj\n";
-    // std::string object__end = "\nendobj";
-    // std::string _dict = object__start + "undefined" + object__end;
+    std::string object__start = "\n\n" + std::to_string(max_index + 4) + " 0 obj\n";
+    std::string object__end = "\nendobj";
+    std::string _dict = object__start + "undefined" + object__end;
 
     std::string page_dict = adns.get_page(pdf_content, object_page_ref_annot);
     std::unordered_map<std::string, std::string> annots_on_page = adns.checkAnnotOnPage(page_dict);
@@ -779,9 +779,9 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
     if (check_sign.count("check") > 0 && check_sign.at("check") == "exist") {
         acroform_dict = "\n\n" + check_sign.at("acroform_last_start") + " " + std::to_string(max_index + 2) + " 0 R" + check_sign.at("acroform_last_end");
     }
-    // std::string object__start = "\n\n" + std::to_string(max_index + 4) + " 0 obj\n";
-    // std::string object__end = "\nendobj";
-    // std::string _dict = object__start + "undefined" + object__end;
+    std::string object__start = "\n\n" + std::to_string(max_index + 4) + " 0 obj\n";
+    std::string object__end = "\nendobj";
+    std::string _dict = object__start + "undefined" + object__end;
 
     std::string page_dict = adns.get_page(pdf_content, object_page_ref_annot);
     std::unordered_map<std::string, std::string> annots_on_page = adns.checkAnnotOnPage(page_dict);
