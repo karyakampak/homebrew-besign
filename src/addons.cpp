@@ -384,63 +384,6 @@ std::vector<uint8_t> Addons::hexStringToBytes(const std::string& hex) {
     return bytes;
 }
 
-std::string Addons::base64_encode_2(const unsigned char* input, int length) {
-    BIO* b64 = BIO_new(BIO_f_base64());
-    BIO* bio = BIO_new(BIO_s_mem());
-    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
-    BIO_push(b64, bio);
-    BIO_write(b64, input, length);
-    BIO_flush(b64);
-
-    BUF_MEM* bufferPtr;
-    BIO_get_mem_ptr(b64, &bufferPtr);
-
-    std::string base64_output(bufferPtr->data, bufferPtr->length); // Exclude null terminator
-
-    BIO_free_all(b64);
-
-    return base64_output;
-}
-
-
-std::vector<uint8_t> Addons::base64_decode_2(const std::string& base64Data) {
-    BIO *bio, *b64;
-    std::vector<uint8_t> decodedData;
-
-    b64 = BIO_new(BIO_f_base64());
-    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
-    bio = BIO_new_mem_buf((void*)base64Data.c_str(), base64Data.length());
-    bio = BIO_push(b64, bio);
-
-    // Allocate enough memory for decoding
-    decodedData.resize(base64Data.length());
-
-    // Perform decoding
-    int len = BIO_read(bio, decodedData.data(), decodedData.size());
-    if (len > 0) {
-        // Resize vector to actual decoded length
-        decodedData.resize(len);
-    } else {
-        // Handle decoding error
-        std::cerr << "Error decoding Base64 data" << std::endl;
-        decodedData.clear();
-    }
-
-    // Free BIOs
-    BIO_free_all(bio);
-
-    return decodedData;
-}
-
-// Function to convert binary data to hex string
-std::string Addons::binaryToHex_2(const unsigned char* data, size_t length) {
-    std::ostringstream oss;
-    for (size_t i = 0; i < length; ++i) {
-        oss << std::hex << std::setw(2) << std::setfill('0') << (int)data[i];
-    }
-    return oss.str();
-}
-
 // Print the OID of the X509_ATTRIBUTE
 void Addons::print_attribute_oid(const X509_ATTRIBUTE* attr) {
     const ASN1_OBJECT* obj = X509_ATTRIBUTE_get0_object(const_cast<X509_ATTRIBUTE*>(attr));
@@ -450,7 +393,7 @@ void Addons::print_attribute_oid(const X509_ATTRIBUTE* attr) {
 }
 
 // Function to load PKCS#12 file and extract certificate, private key, and the chain of certificates
-bool Addons::loadPKCS12_2(const std::string& pkcs12Path, const std::string& password, EVP_PKEY*& pkey, X509*& cert, STACK_OF(X509)*& ca) {
+bool Addons::loadPKCS12(const std::string& pkcs12Path, const std::string& password, EVP_PKEY*& pkey, X509*& cert, STACK_OF(X509)*& ca) {
     FILE* fp = fopen(pkcs12Path.c_str(), "rb");
     if (!fp) {
         std::cerr << "Unable to open PKCS#12 file" << std::endl;
@@ -530,7 +473,7 @@ std::string Addons::digest(std::vector<unsigned char> data) {
     SHA256(data.data(), data.size(), sha256_digest);
 
     // Encode the hash as a base64 string
-    std::string hash = base64_encode_2(sha256_digest, SHA256_DIGEST_LENGTH);
+    std::string hash = base64_encode(sha256_digest, SHA256_DIGEST_LENGTH);
 
     return hash;
 }

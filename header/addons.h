@@ -67,11 +67,8 @@ public:
 
 
     // Member function declaration
-    std::string base64_encode_2(const unsigned char* input, int length);
-    std::vector<uint8_t> base64_decode_2(const std::string& base64Data);
-    std::string binaryToHex_2(const unsigned char* data, size_t length);
     void print_attribute_oid(const X509_ATTRIBUTE* attr);
-    bool loadPKCS12_2(const std::string& pkcs12Path, const std::string& password, EVP_PKEY*& pkey, X509*& cert, STACK_OF(X509)*& ca);
+    bool loadPKCS12(const std::string& pkcs12Path, const std::string& password, EVP_PKEY*& pkey, X509*& cert, STACK_OF(X509)*& ca);
     bool loadPKCS12_from_base64(const std::vector<uint8_t>& pkcs12_vec, const std::string& password, EVP_PKEY*& pkey, X509*& cert, STACK_OF(X509)*& ca);
     std::vector<unsigned char> readData(std::string filePath);
     std::string digest(std::vector<unsigned char> data);

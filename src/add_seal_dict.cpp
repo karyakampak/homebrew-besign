@@ -79,7 +79,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict
 
     std::unordered_map<std::string, std::string> read_pdf_dict = read_pdf;
     std::string catalog_dict = adns.get_catalog(pdf_content, read_pdf_dict);
-    std::string root_obj = "\n" + catalog_dict.substr(0, catalog_dict.length() - 4) + "\n/Perms << /DocMDP 41 0 R >>\n/AcroForm " + std::to_string(max_index + 3) + " 0 R\n>>\nendobj";
+    std::string root_obj = "\n" + catalog_dict.substr(0, catalog_dict.length() - 4) + "\n/Perms << /DocMDP " + std::to_string(max_index + 1) + " 0 R >>\n/AcroForm " + std::to_string(max_index + 3) + " 0 R\n>>\nendobj";
     std::vector<unsigned char> root_obj_vec(root_obj.begin(), root_obj.end());
 
 
@@ -249,7 +249,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict
 
     std::unordered_map<std::string, std::string> read_pdf_dict = read_pdf;
     std::string catalog_dict = adns.get_catalog(pdf_content, read_pdf_dict);
-    std::string root_obj = "\n" + catalog_dict.substr(0, catalog_dict.length() - 4) + "\n/Perms << /DocMDP 41 0 R >>\n/AcroForm " + std::to_string(max_index + 3) + " 0 R\n>>\nendobj";
+    std::string root_obj = "\n" + catalog_dict.substr(0, catalog_dict.length() - 4) + "\n/Perms << /DocMDP " + std::to_string(max_index + 1) + " 0 R >>\n/AcroForm " + std::to_string(max_index + 3) + " 0 R\n>>\nendobj";
     std::vector<unsigned char> root_obj_vec(root_obj.begin(), root_obj.end());
 
 
@@ -425,7 +425,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict
 
     std::unordered_map<std::string, std::string> read_pdf_dict = read_pdf;
     std::string catalog_dict = adns.get_catalog(pdf_content, read_pdf_dict);
-    std::string root_obj = "\n" + catalog_dict.substr(0, catalog_dict.length() - 4) + "\n/Perms << /DocMDP 41 0 R >>\n/AcroForm " + std::to_string(max_index + 3) + " 0 R\n>>\nendobj";
+    std::string root_obj = "\n" + catalog_dict.substr(0, catalog_dict.length() - 4) + "\n/Perms << /DocMDP " + std::to_string(max_index + 1) + " 0 R >>\n/AcroForm " + std::to_string(max_index + 3) + " 0 R\n>>\nendobj";
     std::vector<unsigned char> root_obj_vec(root_obj.begin(), root_obj.end());
 
 
@@ -603,7 +603,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict
 
     std::unordered_map<std::string, std::string> read_pdf_dict = read_pdf;
     std::string catalog_dict = adns.get_catalog(pdf_content, read_pdf_dict);
-    std::string root_obj = "\n" + catalog_dict.substr(0, catalog_dict.length() - 4) + "\n/Perms << /DocMDP 41 0 R >>\n/AcroForm " + std::to_string(max_index + 3) + " 0 R\n>>\nendobj";
+    std::string root_obj = "\n" + catalog_dict.substr(0, catalog_dict.length() - 4) + "\n/Perms << /DocMDP " + std::to_string(max_index + 1) + " 0 R >>\n/AcroForm " + std::to_string(max_index + 3) + " 0 R\n>>\nendobj";
     std::vector<unsigned char> root_obj_vec(root_obj.begin(), root_obj.end());
 
 
@@ -790,7 +790,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSealDict::add_sealdict
 
     std::unordered_map<std::string, std::string> read_pdf_dict = read_pdf;
     std::string catalog_dict = adns.get_catalog(pdf_content, read_pdf_dict);
-    std::string root_obj = "\n" + catalog_dict.substr(0, catalog_dict.length() - 4) + "\n/Perms << /DocMDP 41 0 R >>\n/AcroForm " + std::to_string(max_index + 3) + " 0 R\n>>\nendobj";
+    std::string root_obj = "\n" + catalog_dict.substr(0, catalog_dict.length() - 4) + "\n/Perms << /DocMDP " + std::to_string(max_index + 1) + " 0 R >>\n/AcroForm " + std::to_string(max_index + 3) + " 0 R\n>>\nendobj";
     std::vector<unsigned char> root_obj_vec(root_obj.begin(), root_obj.end());
 
 
