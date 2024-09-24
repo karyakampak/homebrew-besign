@@ -115,3 +115,52 @@ set_target_properties(besign_executable PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CM
 
 # Set output name
 set_target_properties(besign_library besign_object besign_executable PROPERTIES OUTPUT_NAME besign)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Specify the Python module build command
+add_custom_target(build_besign_helper ALL
+    COMMAND ${Python3_EXECUTABLE} setup.py build_ext --inplace
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/besign_helper
+    COMMENT "Building the besign_helper Cython module"
+)
+
+# Install all files from the cython directory to the destination directory
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/besign_helper/
+        DESTINATION ${LIB_DIR}
+        FILES_MATCHING PATTERN "*")
+
+# Install code to update PYTHONPATH
+install(CODE "
+    # Check the current shell and set the appropriate shell config file
+    if(\$ENV{SHELL} MATCHES \".*/zsh\")
+        set(SHELL_RC \"~/.zshrc\")
+    elseif(\$ENV{SHELL} MATCHES \".*/bash\")
+        set(SHELL_RC \"~/.bashrc\")
+    else()
+        message(FATAL_ERROR \"Unsupported shell: \$ENV{SHELL}\")
+    endif()
+
+    # Define the export command to add PYTHONPATH
+    set(EXPORT_COMMAND \"echo 'export PYTHONPATH=${LIB_DIR}:\\\$PYTHONPATH' >> \${SHELL_RC}\")
+    
+    # Execute the command to update the shell config
+    execute_process(COMMAND /bin/sh -c \"\${EXPORT_COMMAND}\")
+
+    # Source the updated shell config
+    execute_process(COMMAND /bin/sh -c \"source \${SHELL_RC}\")
+    
+    # Notify the user
+    message(STATUS \"PYTHONPATH has been added to \${SHELL_RC}.\")
+")
