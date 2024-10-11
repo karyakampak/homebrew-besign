@@ -7,6 +7,7 @@
 #include "../header/add_seal_dict.h"
 #include "../header/get_added_index.h"
 #include "../header/add_trailer.h"
+#include "../header/find_char_position.h"
 #include <unordered_map>
 #include <iostream>
 #include <fstream>
@@ -18,6 +19,21 @@ AddPlaceHolder::AddPlaceHolder() {
 }
 
 std::unordered_map<std::string, std::string> AddPlaceHolder::addPlaceholder(int type, const char* pdf_path, int isProtected, const char* character, const char* imageorurl, int page, float x, float y, float width, float height, int isSeal) {
+
+    if(type == 3 || type == 4){
+        FindCharPosition fcp;
+        std::vector<std::map<std::string, double>> positions = fcp.findCharPosition(pdf_path, character[0], page);
+        x = positions[0].at("x");
+        y = positions[0].at("y");
+
+        // Output positions
+        for (const auto& pos : positions) {
+            std::cout << "Character found at: x=" << pos.at("x") 
+                      << ", y=" << pos.at("y")
+                      << ", width=" << pos.at("width")
+                      << ", height=" << pos.at("height") << std::endl;
+        }
+    }
 
     OpenFile opf;
     std::vector<uint8_t> pdfContent = opf.open(pdf_path, isProtected);
@@ -57,9 +73,9 @@ std::unordered_map<std::string, std::string> AddPlaceHolder::addPlaceholder(int 
         } else if (type == 2) {
             signature_object_added = adseal.add_sealdict_with_qr(pdfContent, imageorurl, page, x, y, width, height, page_reference, pdf_component, signature_reference);
         }else if (type == 3) {
-            signature_object_added = adseal.add_sealdict_image_to_char(pdfContent, character, imageorurl, page, width, height, page_reference, pdf_component, signature_reference);
+            signature_object_added = adseal.add_sealdict_image_to_char(pdfContent, character, imageorurl, page, x, y, width, height, page_reference, pdf_component, signature_reference);
         }else if (type == 4) {
-            signature_object_added = adseal.add_sealdict_qr_to_char(pdfContent, character, imageorurl, page, width, height, page_reference, pdf_component, signature_reference);
+            signature_object_added = adseal.add_sealdict_qr_to_char(pdfContent, character, imageorurl, page, x, y, width, height, page_reference, pdf_component, signature_reference);
         } else {
             signature_object_added = adseal.add_sealdict(pdfContent, page, page_reference, pdf_component, signature_reference);
         }
@@ -69,9 +85,9 @@ std::unordered_map<std::string, std::string> AddPlaceHolder::addPlaceholder(int 
         } else if (type == 2) {
             signature_object_added = adsig.add_signaturedict_with_qr(pdfContent, imageorurl, page, x, y, width, height, page_reference, pdf_component, signature_reference);
         }else if (type == 3) {
-            signature_object_added = adsig.add_signaturedict_image_to_char(pdfContent, character, imageorurl, page, width, height, page_reference, pdf_component, signature_reference);
+            signature_object_added = adsig.add_signaturedict_image_to_char(pdfContent, character, imageorurl, page, x, y, width, height, page_reference, pdf_component, signature_reference);
         }else if (type == 4) {
-            signature_object_added = adsig.add_signaturedict_qr_to_char(pdfContent, character, imageorurl, page, width, height, page_reference, pdf_component, signature_reference);
+            signature_object_added = adsig.add_signaturedict_qr_to_char(pdfContent, character, imageorurl, page, x, y, width, height, page_reference, pdf_component, signature_reference);
         } else {
             signature_object_added = adsig.add_signaturedict(pdfContent, page, page_reference, pdf_component, signature_reference);
         }

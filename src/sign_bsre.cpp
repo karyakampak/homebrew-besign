@@ -456,7 +456,6 @@ std::unordered_map<std::string, std::vector<uint8_t> > get_signature(std::string
                     std::cerr << "Error: Signature data missing or null" << std::endl;
                     std::string tokenstring = get_token(id, secret);
                     saveToken(tokenstring);
-                    get_signature(bsHash, nik, passphrase, id, secret);
                 }
 
             } catch (const std::exception& e) {

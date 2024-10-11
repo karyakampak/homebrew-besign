@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 
+# Set the toolchain file for Emscripten
+if(EMSCRIPTEN)
+    set(CMAKE_TOOLCHAIN_FILE "${Emscripten_DIR}/emscripten.cmake")
+endif()
+
 # Project setup
 project(BESIGN)
 
@@ -7,8 +12,17 @@ project(BESIGN)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
+# Find the Poppler library
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(POPPLER REQUIRED poppler-cpp)
+
+# Include Poppler headers
+include_directories(${POPPLER_INCLUDE_DIRS})
+
+# Add the library search paths (manually specify directories if necessary)
+link_directories(${POPPLER_LIBRARY_DIRS})
+
 # Find Dependencies
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 find_package(OpenCV REQUIRED)
 find_library(QRENCODE_LIB qrencode)
 find_package(OpenSSL REQUIRED)
@@ -16,11 +30,14 @@ find_package(CURL REQUIRED)
 find_package(nlohmann_json 3.2.0 REQUIRED)
 find_package(ZLIB REQUIRED)
 
-# Optionally find UUID library
-find_library(UUID_LIBRARY NAMES uuid)
-
 # Include directories for found dependencies
-include_directories(${Python3_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIRS} ${nlohmann_json_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIRS} ${nlohmann_json_INCLUDE_DIRS})
+
+# Exclude libraries that are not compatible with WebAssembly
+if(EMSCRIPTEN)
+    # You might need to handle or stub out certain libraries like OpenSSL, CURL, etc.
+    message(STATUS "Building for WebAssembly, some libraries may be omitted or modified.")
+endif()
 
 # Define source files
 set(SOURCES
@@ -40,11 +57,11 @@ set(SOURCES
     src/calculate_hash.cpp
     src/add_signature_dict.cpp
     src/add_seal_dict.cpp
-    src/visualization.cpp
     src/check_signature.cpp
     src/get_page_reference.cpp
     src/get_pdf_component.cpp
     src/open_file.cpp
+    src/find_char_position.cpp
     src/addons.cpp
     src/main.cpp
 )
@@ -55,10 +72,16 @@ add_library(besign_object OBJECT ${SOURCES})
 add_executable(besign_executable ${SOURCES})
 
 # Link libraries to targets
-target_link_libraries(besign_executable ${PYTHON_LIBRARIES} ${UUID_LIBRARY} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS} ${Python3_LIBRARIES})
-target_link_libraries(besign_library ${PYTHON_LIBRARIES} ${UUID_LIBRARY} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS} ${Python3_LIBRARIES})
-target_link_libraries(besign_object ${PYTHON_LIBRARIES} ${UUID_LIBRARY} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS} ${Python3_LIBRARIES})
-
+if(NOT EMSCRIPTEN)
+    target_link_libraries(besign_executable ${POPPLER_LIBRARIES} ${UUID_LIBRARY} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS})
+    target_link_libraries(besign_library ${POPPLER_LIBRARIES} ${UUID_LIBRARY} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS})
+    target_link_libraries(besign_object ${POPPLER_LIBRARIES} ${UUID_LIBRARY} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS})
+else()
+    # For WebAssembly, you might want to link different libraries or handle them differently
+    target_link_libraries(besign_executable -s EXPORTED_FUNCTIONS="['_main']")
+    target_link_libraries(besign_library)
+    target_link_libraries(besign_object)
+endif()
 
 # Install setup
 install(TARGETS besign_executable DESTINATION bin)
@@ -80,19 +103,12 @@ install(FILES
     header/calculate_hash.h
     header/add_signature_dict.h
     header/add_seal_dict.h
-    header/visualization.h
     header/check_signature.h
     header/get_page_reference.h
     header/get_pdf_component.h
     header/open_file.h
+    header/find_char_position.h
     header/addons.h
-    DESTINATION include
-)
-
-install(FILES
-    LICENSE.txt
-    README.md
-    AUTHORS.md
     DESTINATION include
 )
 
@@ -107,60 +123,17 @@ else()
     set(BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin")
 endif()
 
-
 # Set output directories for the targets
-set_target_properties(besign_library PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set_target_properties(besign_object PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/obj)
-set_target_properties(besign_executable PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
+set_target_properties(besign_library PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    BUILD_WITH_INSTALL_RPATH TRUE
+    INSTALL_RPATH "${POPPLER_LIBRARY_DIRS}"
+)
+set_target_properties(besign_executable PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    BUILD_WITH_INSTALL_RPATH TRUE
+    INSTALL_RPATH "${POPPLER_LIBRARY_DIRS}"
+)
 # Set output name
 set_target_properties(besign_library besign_object besign_executable PROPERTIES OUTPUT_NAME besign)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Specify the Python module build command
-add_custom_target(build_besign_helper ALL
-    COMMAND ${Python3_EXECUTABLE} setup.py build_ext --inplace
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/besign_helper
-    COMMENT "Building the besign_helper Cython module"
-)
-
-# Install all files from the cython directory to the destination directory
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/besign_helper/
-        DESTINATION ${LIB_DIR}
-        FILES_MATCHING PATTERN "*")
-
-# Install code to update PYTHONPATH
-install(CODE "
-    # Check the current shell and set the appropriate shell config file
-    if(\$ENV{SHELL} MATCHES \".*/zsh\")
-        set(SHELL_RC \"~/.zshrc\")
-    elseif(\$ENV{SHELL} MATCHES \".*/bash\")
-        set(SHELL_RC \"~/.bashrc\")
-    else()
-        message(FATAL_ERROR \"Unsupported shell: \$ENV{SHELL}\")
-    endif()
-
-    # Define the export command to add PYTHONPATH
-    set(EXPORT_COMMAND \"echo 'export PYTHONPATH=${LIB_DIR}:\\\$PYTHONPATH' >> \${SHELL_RC}\")
-    
-    # Execute the command to update the shell config
-    execute_process(COMMAND /bin/sh -c \"\${EXPORT_COMMAND}\")
-
-    # Source the updated shell config
-    execute_process(COMMAND /bin/sh -c \"source \${SHELL_RC}\")
-    
-    # Notify the user
-    message(STATUS \"PYTHONPATH has been added to \${SHELL_RC}.\")
-")

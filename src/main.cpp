@@ -22,6 +22,7 @@
 #include <openssl/buffer.h>
 #include <openssl/evp.h>
 #include <filesystem>  // C++17
+#include <chrono>  // For timing utilities
 
 using json = nlohmann::json;
 
@@ -124,6 +125,9 @@ extern "C" {
 
     void signWithP12(int type, const char* pdf_path, int isProtected, const char* character, const char* imageorurl, const char* output_path, int page, float x, float y, float width, float height, const char* p12Path, const char* passphrase, int isSeal){
 
+        // Get the starting time
+        auto start = std::chrono::high_resolution_clock::now();
+
         AddPlaceHolder addPlaceHolder;
         std::unordered_map<std::string, std::string> placeholderData = addPlaceHolder.addPlaceholder(type, pdf_path, isProtected, character, imageorurl, page, x, y, width, height, isSeal);
         std::string placedHolder = placeholderData.at("placedHolder");
@@ -135,6 +139,15 @@ extern "C" {
 
         SavePdf svpdf;
         svpdf.savePDF(signed_pdf, output_path);
+
+        // Get the ending time
+        auto end = std::chrono::high_resolution_clock::now();
+
+        // Calculate the duration
+        std::chrono::duration<double> elapsed = end - start;
+
+        // Output the elapsed time
+        std::cout << "Execution time: " << elapsed.count() << " seconds" << std::endl;
     }
 
     void signBSrE(int type, const char* pdf_path, int isProtected, const char* character, const char* imageorurl, const char* output_path, int page, float x, float y, float width, float height, const char* nik, const char* passphrase, const char* id, const char* secret, int isLTV, int isSeal){

@@ -1,6 +1,5 @@
 #include "../header/add_signature_dict.h"
 #include "../header/addons.h"
-#include "../header/visualization.h"
 #include "../header/stb_image.h"
 #include <iostream>
 #include <fstream>
@@ -180,8 +179,6 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
 
 
 
-        Visualization vzsl;
-        // std::vector<uint8_t> visualization = vzsl.get_image(image_data);
         cv::Mat img = cv::imdecode(image_data, cv::IMREAD_UNCHANGED);
         std::vector<uint8_t> visualization = adns.process_image(img);
         std::string visualization_string(visualization.begin(), visualization.end());
@@ -356,8 +353,6 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
         int widthImage, heightImage, channels;
         stbi_load_from_memory(image_char.data(), image_char.size(), &widthImage, &heightImage, &channels, 0);
 
-        Visualization vzsl;
-        // std::vector<uint8_t> visualization = vzsl.get_image(image_data);
         cv::Mat img = cv::imdecode(image_data, cv::IMREAD_UNCHANGED);
         std::vector<uint8_t> visualization = adns.process_image(img);
         std::string visualization_string(visualization.begin(), visualization.end());
@@ -477,7 +472,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
     return myMap;
 }
 
-std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_signaturedict_image_to_char(std::vector<unsigned char> pdf_content, const char* character, const char* input_image_path_string, int page, float width, float height, std::vector<std::string> object_page_ref, std::unordered_map<std::string, std::string> read_pdf, std::unordered_map<std::string, std::string> check_sign) {
+std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_signaturedict_image_to_char(std::vector<unsigned char> pdf_content, const char* character, const char* input_image_path_string, int page, float x, float y, float width, float height, std::vector<std::string> object_page_ref, std::unordered_map<std::string, std::string> read_pdf, std::unordered_map<std::string, std::string> check_sign) {
 
     Addons adns;
 
@@ -526,34 +521,28 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
 
 
 
-        Visualization vzsl;
-        std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), character);
+        // Visualization vzsl;
+        // std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), character);
         // std::vector<uint8_t> visualization = vzsl.get_image(image_data);
         cv::Mat img = cv::imdecode(image_data, cv::IMREAD_UNCHANGED);
         std::vector<uint8_t> visualization = adns.process_image(img);
         std::string visualization_string(visualization.begin(), visualization.end());
         // std::cout << visualization_string << std::endl;
 
-        // Jika menggunnakan tanda #
-        int x = positions[0];
-        int y = positions[1];
-
         float rectWidth;
         float rectHeight;
-        if (width/height > widthImage/heightImage)
+        if (widthImage/heightImage > 1)
         {
             rectHeight = height;
             rectWidth = rectHeight/heightImage*widthImage;
-            x = x + ((width-rectWidth)/2);
+            x = x - (rectWidth/2);
+            y = y - (rectHeight/2);
         } else{
             rectWidth = width;
             rectHeight = (rectWidth/widthImage)*heightImage;
-            y = y + ((height-rectHeight)/2);
+            x = x - (rectWidth/2);
+            y = y - (rectHeight/2);
         }
-
-        // Jika menggunnakan tanda #
-        x = positions[0] - (rectWidth/2);
-        y = positions[1] - (rectHeight/2);
         
 
         annot_dict = object_annot_start + "/Type /Annot\n/Subtype /Widget\n/FT /Sig\n/Rect [" + std::to_string(x) + " " + std::to_string(y) + " " + std::to_string(x + rectWidth) + " " + std::to_string(y+rectHeight) +  "]\n/AP <<\n/N " + std::to_string(max_index + 5) + " 0 R\n>>\n/V " + std::to_string(max_index + 1) + " 0 R\n/T (Signature_" + std::to_string(milliseconds) + ")\n/F 4\n/P " + object_page_ref_annot + object_annot_end;
@@ -654,8 +643,8 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
     return myMap;
 }
 
-std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_signaturedict_qr_to_char(std::vector<unsigned char> pdf_content, const char* character, const char* url, int page, float width, float height, std::vector<std::string> object_page_ref, std::unordered_map<std::string, std::string> read_pdf, std::unordered_map<std::string, std::string> check_sign) {
-
+std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_signaturedict_qr_to_char(std::vector<unsigned char> pdf_content, const char* character, const char* url, int page, float x, float y, float width, float height, std::vector<std::string> object_page_ref, std::unordered_map<std::string, std::string> read_pdf, std::unordered_map<std::string, std::string> check_sign) {
+ 
     Addons adns;
 
     size_t max_index = 0;
@@ -711,34 +700,15 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddSignatureDict::add_sig
 
 
 
-        Visualization vzsl;
-        // std::vector<uint8_t> visualization = vzsl.get_image(image_data);
         cv::Mat img = cv::imdecode(image_data, cv::IMREAD_UNCHANGED);
         std::vector<uint8_t> visualization = adns.process_image(img);
         std::string visualization_string(visualization.begin(), visualization.end());
-        std::vector<double> positions = vzsl.get_position(pdf_content, (page-1), character);
 
 
-        // Jika menggunnakan tanda #
-        int x = positions[0];
-        int y = positions[1];
-
-        float rectWidth;
-        float rectHeight;
-        if (width/height > widthImage/heightImage)
-        {
-            rectHeight = height;
-            rectWidth = rectHeight/heightImage*widthImage;
-            x = x + ((width-rectWidth)/2);
-        } else{
-            rectWidth = width;
-            rectHeight = (rectWidth/widthImage)*heightImage;
-            y = y + ((height-rectHeight)/2);
-        }
-
-        // Jika menggunnakan tanda #
-        x = positions[0] - (rectWidth/2);
-        y = positions[1] - (rectHeight/2);
+        float rectWidth = width;
+        float rectHeight = height;
+        x = x - (rectWidth/2);
+        y = y - (rectHeight/2);
         
 
         annot_dict = object_annot_start + "/Type /Annot\n/Subtype /Widget\n/FT /Sig\n/Rect [" + std::to_string(x) + " " + std::to_string(y) + " " + std::to_string(x + rectWidth) + " " + std::to_string(y+rectHeight) +  "]\n/AP <<\n/N " + std::to_string(max_index + 5) + " 0 R\n>>\n/V " + std::to_string(max_index + 1) + " 0 R\n/T (Signature_" + std::to_string(milliseconds) + ")\n/F 4\n/P " + object_page_ref_annot + object_annot_end;
