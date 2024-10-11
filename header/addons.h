@@ -37,7 +37,7 @@ public:
     std::vector<size_t> findAllStringPosition(const std::vector<uint8_t>& data, const std::string& query);
     size_t findStringPosition(const std::vector<uint8_t>& data, const std::string& query, size_t start);
     std::vector<std::string> extractPatterns(const std::string& input);
-    std::string generateUUID2();
+    std::string generateUUIDv4();
     std::vector<uint8_t> decodePNG(const char* filename, int& width, int& height, int& channels);
     std::string vectorToHexString(const std::vector<uint8_t>& vec);
     std::string base64_encode(const unsigned char* input, int length);
