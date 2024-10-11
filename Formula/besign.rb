@@ -1,8 +1,8 @@
 class Besign < Formula
   desc "Program for make signature object on pdf"  
   homepage "https://github.com/karyakampak/homebrew-besign"
-  url "https://github.com/karyakampak/homebrew-besign/archive/refs/tags/v1.0.2-dev.tar.gz"
-  sha256 "c356241ac8a5700b59a6fa92466bfda84421249fe0deaffee09c131b13628087"
+  url "https://github.com/karyakampak/homebrew-besign/archive/refs/tags/v1.0.3-dev.tar.gz"
+  sha256 "7dd93409d254f499d4a45d17360c0be7db6297e4401d5e3e12c04b4f39e19f7f"
   license "MIT"
 
   depends_on "cmake" => :build
