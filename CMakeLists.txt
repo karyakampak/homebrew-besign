@@ -66,21 +66,18 @@ set(SOURCES
     src/main.cpp
 )
 
-# Define the shared library, object library, and executable
+# Define the shared library, and executable
 add_library(besign_library SHARED ${SOURCES})
-add_library(besign_object OBJECT ${SOURCES})
 add_executable(besign_executable ${SOURCES})
 
 # Link libraries to targets
 if(NOT EMSCRIPTEN)
-    target_link_libraries(besign_executable ${POPPLER_LIBRARIES} ${UUID_LIBRARY} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS})
-    target_link_libraries(besign_library ${POPPLER_LIBRARIES} ${UUID_LIBRARY} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS})
-    target_link_libraries(besign_object ${POPPLER_LIBRARIES} ${UUID_LIBRARY} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS})
+    target_link_libraries(besign_executable ${POPPLER_LIBRARIES} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS})
+    target_link_libraries(besign_library ${POPPLER_LIBRARIES} ZLIB::ZLIB nlohmann_json::nlohmann_json ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${QRENCODE_LIB} ${OpenCV_LIBS})
 else()
     # For WebAssembly, you might want to link different libraries or handle them differently
     target_link_libraries(besign_executable -s EXPORTED_FUNCTIONS="['_main']")
     target_link_libraries(besign_library)
-    target_link_libraries(besign_object)
 endif()
 
 # Install setup
@@ -124,7 +121,6 @@ else()
 endif()
 
 # Set output directories for the targets
-set_target_properties(besign_object PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/obj)
 set_target_properties(besign_library PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
     INSTALL_RPATH_USE_LINK_PATH TRUE
     BUILD_WITH_INSTALL_RPATH TRUE
@@ -136,4 +132,4 @@ set_target_properties(besign_executable PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CM
     INSTALL_RPATH "${POPPLER_LIBRARY_DIRS}"
 )
 # Set output name
-set_target_properties(besign_library besign_object besign_executable PROPERTIES OUTPUT_NAME besign)
+set_target_properties(besign_library besign_executable PROPERTIES OUTPUT_NAME besign)

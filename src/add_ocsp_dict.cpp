@@ -10,7 +10,6 @@
 #include <sstream>
 #include <iomanip>
 #include <fstream>
-#include <uuid/uuid.h>
 #include <iostream>
 #include <openssl/x509.h>
 #include <openssl/err.h>
@@ -138,7 +137,7 @@ std::unordered_map<std::string, std::vector<uint8_t> > AddOCSPDict::add_ocsp_dic
     std::string object__end = "\nendobj";
     std::string _dict = object__start + "<<\n/VRI "+ std::to_string(max_index + 2) + " 0 R" + "\n/OCSPs ["+ std::to_string(max_index + 3) + " 0 R]" + "\n/Certs ["+ std::to_string(max_index + 5) + " 0 R " + std::to_string(max_index + 6) + " 0 R]\n>>" + object__end;
 
-    std::string uniqueID = adns.generateUUID2();
+    std::string uniqueID = adns.generateUUIDv4();
 
     std::string object_2_start = "\n\n" + std::to_string(max_index + 2) + " 0 obj\n";
     std::string object_2_end = "\nendobj";

@@ -9,7 +9,6 @@
 #include <stdexcept>
 #include <cctype>
 #include <regex>
-#include <uuid/uuid.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "../header/stb_image.h"
 #include <sstream>
@@ -28,6 +27,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <zlib.h>
+#include <random>
+#include <array>
 
 #define PIXEL_SIZE 10  // Scale of each QR code pixel block
 
@@ -146,18 +147,38 @@ std::vector<std::string> Addons::extractPatterns(const std::string& input) {
 }
 
 
-std::string Addons::generateUUID2() {
-    uuid_t uuid;
-    uuid_generate(uuid);
+// Helper function to format bytes as a hex string
+std::string formatBytes(const std::array<unsigned char, 16>& bytes, int start, int length) {
+    std::ostringstream oss;
+    for (int i = start; i < start + length; ++i) {
+        oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[i]);
+    }
+    return oss.str();
+}
 
-    char uuidStr[37]; // 36 characters + null terminator
-    uuid_unparse(uuid, uuidStr);
+// Function to generate UUID version 4
+std::string Addons::generateUUIDv4() {
+    // Create a random number generator
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 255);
 
-    std::string uuidString(uuidStr);
-    // Remove hyphens from the UUID string
-    uuidString.erase(std::remove(uuidString.begin(), uuidString.end(), '-'), uuidString.end());
+    // Generate 16 random bytes
+    std::array<unsigned char, 16> bytes;
+    for (int i = 0; i < 16; ++i) {
+        bytes[i] = static_cast<unsigned char>(dis(gen));
+    }
 
-    return uuidString;
+    // Set version (4) and variant bits according to the UUID spec
+    bytes[6] = (bytes[6] & 0x0F) | 0x40;  // Version 4 (random UUID)
+    bytes[8] = (bytes[8] & 0x3F) | 0x80;  // Variant 1 (RFC 4122)
+
+    // Format the UUID as a string (without hyphens)
+    std::string uuid = formatBytes(bytes, 0, 4) + formatBytes(bytes, 4, 2) +
+                       formatBytes(bytes, 6, 2) + formatBytes(bytes, 8, 2) +
+                       formatBytes(bytes, 10, 6);
+                       
+    return uuid; // Return UUID without hyphens
 }
 
 std::vector<uint8_t> Addons::decodePNG(const char* filename, int& width, int& height, int& channels) {

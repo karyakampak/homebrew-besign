@@ -6,8 +6,9 @@
 #include <string>
 #include <stdexcept>
 #include <openssl/err.h>
-#include <uuid/uuid.h>
-#include <iostream>
+#include <random>
+#include <sstream>
+#include <array>
 
 AddOCSPTrailer::AddOCSPTrailer() {
     // Initialize private member variables or perform any necessary setup
@@ -29,7 +30,7 @@ std::vector<uint8_t> create_ocsp_buffer_trailer(const std::vector<uint8_t>& pdf,
     trailer += "\n/Root " + placeholderData.at("pdf_component_root");
     trailer += "\n/Info " + placeholderData.at("pdf_component_info");\
     if(placeholderData.at("pdf_component_id") != "none"){
-        trailer += "\n/ID " + placeholderData.at("pdf_component_id")+" <"+adns.generateUUID2()+"> ]";
+        trailer += "\n/ID " + placeholderData.at("pdf_component_id")+" <"+adns.generateUUIDv4()+"> ]";
         // trailer += "\n/ID " + placeholderData.at("pdf_component_id");
     }
     trailer += "\n/Prev " + placeholderData.at("pdf_component_prev");

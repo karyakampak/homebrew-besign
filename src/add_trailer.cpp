@@ -6,8 +6,9 @@
 #include <string>
 #include <stdexcept>
 #include <openssl/err.h>
-#include <uuid/uuid.h>
-#include <iostream>
+#include <random>
+#include <sstream>
+#include <array>
 
 AddTrailer::AddTrailer() {
     // Initialize private member variables or perform any necessary setup
@@ -34,7 +35,7 @@ std::unordered_map<std::string, std::string> create_buffer_trailer(const std::ve
     }
     // trailer += "\n/Info " + read_pdf.at("infoRef");
     if(read_pdf.at("idRef") != "none"){
-        trailer += "\n/ID " + read_pdf.at("idRef")+"> <"+adns.generateUUID2()+">]";
+        trailer += "\n/ID " + read_pdf.at("idRef")+"> <"+adns.generateUUIDv4()+">]";
         // trailer += "\n/ID " + read_pdf.at("idRef");
     }
     trailer += "\n/Prev " + read_pdf.at("xRefPosition");

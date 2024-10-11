@@ -41,8 +41,6 @@ std::vector<std::map<std::string, double>> FindCharPosition::findCharPosition(co
         double pageHeight = page->page_rect().height();
         double pageWidth = page->page_rect().width();
 
-        std::cout << "PageWidth : " << pageWidth << " PageHeight : " << pageHeight << std::endl;
-
         // Extract text from the page
         std::vector<poppler::text_box> textBoxes = page->text_list();
 

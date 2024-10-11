@@ -26,13 +26,13 @@ std::unordered_map<std::string, std::string> AddPlaceHolder::addPlaceholder(int 
         x = positions[0].at("x");
         y = positions[0].at("y");
 
-        // Output positions
-        for (const auto& pos : positions) {
-            std::cout << "Character found at: x=" << pos.at("x") 
-                      << ", y=" << pos.at("y")
-                      << ", width=" << pos.at("width")
-                      << ", height=" << pos.at("height") << std::endl;
-        }
+        // // Output positions
+        // for (const auto& pos : positions) {
+        //     std::cout << "Character found at: x=" << pos.at("x") 
+        //               << ", y=" << pos.at("y")
+        //               << ", width=" << pos.at("width")
+        //               << ", height=" << pos.at("height") << std::endl;
+        // }
     }
 
     OpenFile opf;
